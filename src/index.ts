@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { handleConfigSet, handleConfigGet } from './commands/config';
+import { handleConfigSet, handleConfigGet, handleConfigList } from './commands/config';
 import { handleSourceAdd, handleSourceList, handleSourceRemove, handleSourceUpdate } from './commands/source';
 import { handleUse, handleList, handleRemove, handleStatus } from './commands/use';
+import { showHelp } from './commands/help';
 import { GLOBAL_CONFIG_DIR } from './utils/path';
 
 const program = new Command();
@@ -13,10 +14,72 @@ program
   .description('CLI tool for managing skills/commands/agents across multiple AI coding tools')
   .version('0.0.1');
 
-// Source management
+// Source management (shortcut options)
 program
-  .option('-s, --source <command> [args...]', 'Source management')
-  .option('-c, --config <command> [args...]', 'Config management');
+  .option('-s, --source <command> [args...]', 'Source management (shortcut)')
+  .option('-c, --config <command> [args...]', 'Config management (shortcut)');
+
+// Source subcommands (full command version)
+const sourceCmd = program
+  .command('sources')
+  .description('Source management');
+
+sourceCmd
+  .command('add <name> <path-or-url>')
+  .description('Add a source')
+  .action(async (name: string, pathOrUrl: string) => {
+    await handleSourceAdd(name, pathOrUrl);
+  });
+
+sourceCmd
+  .command('list')
+  .alias('ls')
+  .description('List all sources')
+  .action(async () => {
+    await handleSourceList();
+  });
+
+sourceCmd
+  .command('remove <name>')
+  .alias('rm')
+  .description('Remove a source')
+  .action(async (name: string) => {
+    await handleSourceRemove(name);
+  });
+
+sourceCmd
+  .command('update [name]')
+  .alias('up')
+  .description('Update source(s)')
+  .action(async (name?: string) => {
+    await handleSourceUpdate(name);
+  });
+
+// Config subcommands (full command version)
+const configCmd = program
+  .command('config')
+  .description('Config management');
+
+configCmd
+  .command('set <key> <value>')
+  .description('Set a config value')
+  .action(async (key: string, value: string) => {
+    await handleConfigSet(key, value);
+  });
+
+configCmd
+  .command('get <key>')
+  .description('Get a config value')
+  .action(async (key: string) => {
+    await handleConfigGet(key);
+  });
+
+configCmd
+  .command('list')
+  .description('Show full configuration')
+  .action(async () => {
+    await handleConfigList();
+  });
 
 // Project commands
 program
@@ -46,6 +109,14 @@ program
   .description('Show project status')
   .action(async () => {
     await handleStatus();
+  });
+
+// Help command
+program
+  .command('help')
+  .description('Show bilingual help information')
+  .action(() => {
+    showHelp();
   });
 
 // Main action handler for -s and -c options

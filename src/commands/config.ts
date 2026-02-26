@@ -26,3 +26,25 @@ export async function handleConfigGet(key: string): Promise<void> {
     console.log(chalk.red(`✗ Unknown config key: ${key}`));
   }
 }
+
+export async function handleConfigList(): Promise<void> {
+  const config = await loadGlobalConfig(GLOBAL_CONFIG_DIR);
+  
+  console.log(chalk.bold('Global Configuration:'));
+  console.log(chalk.gray(`  Config directory: ${GLOBAL_CONFIG_DIR}`));
+  console.log(`  sourcesDir: ${chalk.cyan(config.sourcesDir || 'not set')}`);
+  
+  if (config.sources && Object.keys(config.sources).length > 0) {
+    console.log(`  sources:`);
+    for (const [name, source] of Object.entries(config.sources)) {
+      console.log(`    ${chalk.cyan(name)} (${source.type})`);
+      if (source.type === 'git') {
+        console.log(chalk.gray(`      URL: ${source.url}`));
+      } else {
+        console.log(chalk.gray(`      Path: ${source.path}`));
+      }
+    }
+  } else {
+    console.log(`  sources: ${chalk.gray('none')}`);
+  }
+}
