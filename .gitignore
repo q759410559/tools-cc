@@ -20,4 +20,6 @@ Thumbs.db
 
 # Local config
 .tools-cc/
+.toolscc/
+tools-cc.json
 *.local.json
