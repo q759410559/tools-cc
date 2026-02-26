@@ -9,7 +9,7 @@
 npm install -g tools-cc
 
 # 或从源码构建
-git clone https://github.com/user/tools-cc.git
+git clone https://github.com/q759410559/tools-cc.git
 cd tools-cc
 npm install
 npm run build

@@ -19,6 +19,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/q759410559/tools-cc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/q759410559/tools-cc/issues"
+  },
+  "homepage": "https://github.com/q759410559/tools-cc#readme",
   "dependencies": {
     "chalk": "^5.6.2",
     "commander": "^14.0.3",
