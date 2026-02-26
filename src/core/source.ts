@@ -52,6 +52,17 @@ export async function removeSource(name: string, configDir: string): Promise<voi
     throw new Error(`Source not found: ${name}`);
   }
   
+  const source = config.sources[name];
+  
+  // 如果是 git 类型，清理克隆目录
+  if (source.type === 'git') {
+    const cloneDir = path.join(config.sourcesDir, name);
+    if (await fs.pathExists(cloneDir)) {
+      console.log(`Removing cloned directory: ${cloneDir}`);
+      await fs.remove(cloneDir);
+    }
+  }
+  
   delete config.sources[name];
   await saveGlobalConfig(config, configDir);
 }
