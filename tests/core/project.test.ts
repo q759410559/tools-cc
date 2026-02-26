@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs-extra';
 import path from 'path';
-import { initProject, useSource, unuseSource } from '../../src/core/project';
+import { initProject, useSource, unuseSource, listUsedSources } from '../../src/core/project';
 
 describe('Project Module', () => {
   const testProjectDir = path.join(__dirname, '../fixtures/test-project');
@@ -38,5 +38,13 @@ describe('Project Module', () => {
     
     const config = await fs.readJson(path.join(testProjectDir, 'tools-cc.json'));
     expect(config.sources).not.toContain('test-source');
+  });
+
+  it('should list used sources', async () => {
+    await initProject(testProjectDir);
+    await useSource('test-source', testSourceDir, testProjectDir);
+    
+    const sources = await listUsedSources(testProjectDir);
+    expect(sources).toContain('test-source');
   });
 });

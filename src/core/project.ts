@@ -28,6 +28,16 @@ export async function useSource(
   sourceDir: string,
   projectDir: string
 ): Promise<void> {
+  // Input validation
+  if (!sourceName || !sourceName.trim()) {
+    throw new Error('Source name is required');
+  }
+  
+  // Check source directory existence
+  if (!(await fs.pathExists(sourceDir))) {
+    throw new Error(`Source directory does not exist: ${sourceDir}`);
+  }
+  
   const toolsccDir = getToolsccDir(projectDir);
   const manifest = await loadManifest(sourceDir);
   
@@ -76,6 +86,11 @@ export async function useSource(
 }
 
 export async function unuseSource(sourceName: string, projectDir: string): Promise<void> {
+  // Input validation
+  if (!sourceName || !sourceName.trim()) {
+    throw new Error('Source name is required');
+  }
+  
   const toolsccDir = getToolsccDir(projectDir);
   const configFile = getProjectConfigPath(projectDir);
   
@@ -96,8 +111,15 @@ export async function unuseSource(sourceName: string, projectDir: string): Promi
   // Remove agents subdirectory
   await fs.remove(path.join(toolsccDir, 'agents', sourceName));
   
-  // Update project config
-  const config: ProjectConfig = await fs.readJson(configFile);
+  // Update project config with error handling
+  let config: ProjectConfig;
+  try {
+    config = await fs.readJson(configFile);
+  } catch (error) {
+    // If config file doesn't exist or is invalid, nothing to update
+    return;
+  }
+  
   config.sources = config.sources.filter(s => s !== sourceName);
   await fs.writeJson(configFile, config, { spaces: 2 });
 }
