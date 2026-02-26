@@ -26,6 +26,9 @@ tools-cc -c set sourcesDir D:/skills-hub-sources
 tools-cc -s add my-skills https://github.com/user/my-skills.git
 tools-cc -s add local-skills D:/path/to/local-skills
 
+# 或者扫描源目录自动发现并添加配置
+tools-cc -s scan
+
 # 3. 查看已添加的配置源
 tools-cc -s list
 
@@ -39,8 +42,38 @@ tools-cc status
 # 6. 查看已启用的配置源
 tools-cc list
 
-# 7. 移除配置源
+# 7. 更新配置源（从源目录同步最新内容到项目）
+tools-cc update my-skills
+tools-cc update              # 更新全部
+
+# 8. 移除配置源
 tools-cc rm my-skills
+```
+
+## 工作流说明
+
+### 全局配置源管理 vs 项目配置
+
+| 命令 | 作用域 | 说明 |
+|------|--------|------|
+| `tools-cc -s add/remove/list` | 全局 | 管理全局配置源 |
+| `tools-cc -s update/upgrade` | 全局 | git pull 更新源代码 |
+| `tools-cc -s scan` | 全局 | 扫描目录发现新源 |
+| `tools-cc use/rm` | 项目 | 在项目中启用/禁用源 |
+| `tools-cc update` | 项目 | 同步源内容到项目 |
+
+### 典型工作流
+
+```bash
+# 场景1: 配置源有更新，需要同步到项目
+tools-cc -s upgrade my-skills    # 1. git pull 更新源代码
+cd my-project
+tools-cc update my-skills        # 2. 同步到项目 .toolscc 目录
+
+# 场景2: 批量更新所有源
+tools-cc -s upgrade              # 1. 更新所有 git 源
+cd my-project
+tools-cc update                  # 2. 同步所有源到项目
 ```
 
 ## 命令列表
@@ -49,22 +82,25 @@ tools-cc rm my-skills
 
 ```bash
 # 快捷方式 (-s)
-tools-cc -s add <name> <path-or-url>     # 添加配置源
+tools-cc -s add <name> <path-or-url>     # 添加配置源（Git URL 或本地路径）
 tools-cc -s list                          # 列出所有配置源 (缩写: -s ls)
 tools-cc -s remove <name>                 # 移除配置源 (缩写: -s rm)
-tools-cc -s update [name]                 # 更新配置源 (缩写: -s up)
+tools-cc -s update [name]                 # git pull 更新配置源代码 (缩写: -s up, -s upgrade)
+tools-cc -s scan                          # 扫描 sourcesDir 目录，自动发现并添加配置源
 
 # 完整命令 (sources)
 tools-cc sources add <name> <path-or-url> # 添加配置源
 tools-cc sources list                     # 列出所有配置源 (缩写: sources ls)
 tools-cc sources remove <name>            # 移除配置源 (缩写: sources rm)
-tools-cc sources update [name]            # 更新配置源 (缩写: sources up)
+tools-cc sources update [name]            # git pull 更新配置源代码 (缩写: sources up, sources upgrade)
+tools-cc sources scan                     # 扫描 sourcesDir 目录，自动发现并添加配置源
 ```
 
 ### 项目配置
 
 ```bash
-tools-cc use [sources...] [-p tools...]   # 启用配置源并创建链接
+tools-cc use [sources...] [-p tools...]   # 启用配置源并创建符号链接
+tools-cc update [sources...]              # 同步配置源内容到项目 .toolscc 目录
 tools-cc list                             # 列出已启用的配置源
 tools-cc rm <source>                      # 禁用配置源
 tools-cc status                           # 查看项目状态

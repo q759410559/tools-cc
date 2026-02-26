@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { addSource, listSources, removeSource, updateSource } from '../core/source';
+import { addSource, listSources, removeSource, updateSource, scanSources } from '../core/source';
 import { GLOBAL_CONFIG_DIR } from '../utils/path';
 
 export async function handleSourceAdd(name: string, pathOrUrl: string): Promise<void> {
@@ -57,6 +57,39 @@ export async function handleSourceUpdate(name?: string): Promise<void> {
       }
     }
     console.log(chalk.green(`✓ Update complete`));
+  } catch (error) {
+    console.log(chalk.red(`✗ ${error instanceof Error ? error.message : 'Unknown error'}`));
+  }
+}
+
+export async function handleSourceScan(): Promise<void> {
+  try {
+    console.log(chalk.bold('Scanning sources directory...'));
+    const result = await scanSources(GLOBAL_CONFIG_DIR);
+    
+    if (result.added.length > 0) {
+      console.log(chalk.green(`\n✓ Added ${result.added.length} source(s):`));
+      for (const name of result.added) {
+        console.log(chalk.gray(`  + ${name}`));
+      }
+    }
+    
+    if (result.updated.length > 0) {
+      console.log(chalk.yellow(`\n⚡ Updated ${result.updated.length} source(s):`));
+      for (const name of result.updated) {
+        console.log(chalk.gray(`  ~ ${name}`));
+      }
+    }
+    
+    if (result.skipped.length > 0) {
+      console.log(chalk.gray(`\n→ Skipped ${result.skipped.length} existing source(s)`));
+    }
+    
+    if (result.added.length === 0 && result.updated.length === 0 && result.skipped.length === 0) {
+      console.log(chalk.gray('No sources found in sources directory.'));
+    }
+    
+    console.log(chalk.green(`\n✓ Scan complete`));
   } catch (error) {
     console.log(chalk.red(`✗ ${error instanceof Error ? error.message : 'Unknown error'}`));
   }

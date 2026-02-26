@@ -2,8 +2,8 @@
 
 import { Command } from 'commander';
 import { handleConfigSet, handleConfigGet, handleConfigList } from './commands/config';
-import { handleSourceAdd, handleSourceList, handleSourceRemove, handleSourceUpdate } from './commands/source';
-import { handleUse, handleList, handleRemove, handleStatus } from './commands/use';
+import { handleSourceAdd, handleSourceList, handleSourceRemove, handleSourceUpdate, handleSourceScan } from './commands/source';
+import { handleUse, handleList, handleRemove, handleStatus, handleProjectUpdate } from './commands/use';
 import { showHelp } from './commands/help';
 import { GLOBAL_CONFIG_DIR } from './utils/path';
 
@@ -50,9 +50,17 @@ sourceCmd
 sourceCmd
   .command('update [name]')
   .alias('up')
-  .description('Update source(s)')
+  .alias('upgrade')
+  .description('Update source(s) with git pull')
   .action(async (name?: string) => {
     await handleSourceUpdate(name);
+  });
+
+sourceCmd
+  .command('scan')
+  .description('Scan sources directory and update configuration')
+  .action(async () => {
+    await handleSourceScan();
   });
 
 // Config subcommands (full command version)
@@ -111,6 +119,13 @@ program
     await handleStatus();
   });
 
+program
+  .command('update [sources...]')
+  .description('Update source(s) in current project')
+  .action(async (sources: string[]) => {
+    await handleProjectUpdate(sources);
+  });
+
 // Help command
 program
   .command('help')
@@ -147,7 +162,11 @@ program
           break;
         case 'update':
         case 'up':
+        case 'upgrade':
           await handleSourceUpdate(args[0]);
+          break;
+        case 'scan':
+          await handleSourceScan();
           break;
         default:
           console.log(`Unknown source command: ${cmd}`);

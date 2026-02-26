@@ -145,3 +145,46 @@ export async function handleStatus(): Promise<void> {
   }
   console.log();
 }
+
+export async function handleProjectUpdate(sourceNames?: string[]): Promise<void> {
+  const projectDir = process.cwd();
+  const configFile = path.join(projectDir, 'tools-cc.json');
+  
+  // 检查项目是否已初始化
+  if (!(await fs.pathExists(configFile))) {
+    console.log(chalk.yellow('Project not initialized. Run `tools-cc use <source>` first.'));
+    return;
+  }
+  
+  const config = await fs.readJson(configFile);
+  let sourcesToUpdate = sourceNames && sourceNames.length > 0 
+    ? sourceNames 
+    : config.sources || [];
+  
+  if (sourcesToUpdate.length === 0) {
+    console.log(chalk.gray('No sources to update.'));
+    return;
+  }
+  
+  // 验证指定的源是否存在于项目配置中
+  if (sourceNames && sourceNames.length > 0) {
+    const invalidSources = sourceNames.filter((s: string) => !config.sources.includes(s));
+    if (invalidSources.length > 0) {
+      console.log(chalk.yellow(`Sources not in project: ${invalidSources.join(', ')}`));
+    }
+    sourcesToUpdate = sourcesToUpdate.filter((s: string) => config.sources.includes(s));
+  }
+  
+  // 更新每个配置源
+  for (const sourceName of sourcesToUpdate) {
+    try {
+      const sourcePath = await getSourcePath(sourceName, GLOBAL_CONFIG_DIR);
+      await useSource(sourceName, sourcePath, projectDir);
+      console.log(chalk.green(`✓ Updated source: ${sourceName}`));
+    } catch (error) {
+      console.log(chalk.red(`✗ Failed to update ${sourceName}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
+  }
+  
+  console.log(chalk.green(`\n✓ Project update complete`));
+}
