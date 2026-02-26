@@ -9,10 +9,10 @@ export const DEFAULT_CONFIG = {
   sources: {}
 };
 
-export function getProjectConfigPath(projectDir: string): string {
-  return path.join(projectDir, 'tools-cc.json');
-}
-
 export function getToolsccDir(projectDir: string): string {
   return path.join(projectDir, '.toolscc');
+}
+
+export function getProjectConfigPath(projectDir: string): string {
+  return path.join(getToolsccDir(projectDir), 'config.json');
 }

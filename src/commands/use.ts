@@ -3,7 +3,7 @@ import inquirer from 'inquirer';
 import { useSource, unuseSource, listUsedSources, initProject } from '../core/project';
 import { getSourcePath, listSources } from '../core/source';
 import { createSymlink, isSymlink } from '../core/symlink';
-import { GLOBAL_CONFIG_DIR, getToolsccDir } from '../utils/path';
+import { GLOBAL_CONFIG_DIR, getToolsccDir, getProjectConfigPath } from '../utils/path';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -83,7 +83,7 @@ export async function handleUse(
   }
   
   // 更新项目配置
-  const configFile = path.join(projectDir, 'tools-cc.json');
+  const configFile = getProjectConfigPath(projectDir);
   const config = await fs.readJson(configFile);
   const existingLinks = config.links || [];
   config.links = [...new Set([...existingLinks, ...tools])];
@@ -131,7 +131,7 @@ export async function handleStatus(): Promise<void> {
   console.log(`  Sources: ${sources.length > 0 ? sources.map(s => chalk.cyan(s)).join(', ') : chalk.gray('none')}`);
   
   // 检查 links
-  const configFile = path.join(projectDir, 'tools-cc.json');
+  const configFile = getProjectConfigPath(projectDir);
   if (await fs.pathExists(configFile)) {
     const config = await fs.readJson(configFile);
     console.log(`  Links:`);
@@ -148,7 +148,7 @@ export async function handleStatus(): Promise<void> {
 
 export async function handleProjectUpdate(sourceNames?: string[]): Promise<void> {
   const projectDir = process.cwd();
-  const configFile = path.join(projectDir, 'tools-cc.json');
+  const configFile = getProjectConfigPath(projectDir);
   
   // 检查项目是否已初始化
   if (!(await fs.pathExists(configFile))) {

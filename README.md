@@ -173,6 +173,7 @@ my-skills/
 ```
 my-project/
 ├── .toolscc/                     # 实际内容目录
+│   ├── config.json               # 项目配置
 │   ├── skills/                   # 扁平化，带来源前缀
 │   │   └── my-skills-my-skill/
 │   ├── commands/
@@ -180,8 +181,7 @@ my-project/
 │   └── agents/
 │       └── my-skills/
 ├── .iflow -> .toolscc            # 符号链接
-├── .claude -> .toolscc
-└── tools-cc.json                 # 项目配置
+└── .claude -> .toolscc
 ```
 
 ## 配置文件
@@ -204,7 +204,7 @@ my-project/
 }
 ```
 
-### 项目配置 `项目/tools-cc.json`
+### 项目配置 `项目/.toolscc/config.json`
 
 ```json
 {
