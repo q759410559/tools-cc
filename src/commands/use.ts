@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { useSource, unuseSource, listUsedSources, initProject } from '../core/project';
 import { getSourcePath, listSources } from '../core/source';
-import { createSymlink, removeSymlink, isSymlink } from '../core/symlink';
+import { createSymlink, isSymlink } from '../core/symlink';
 import { GLOBAL_CONFIG_DIR, getToolsccDir } from '../utils/path';
 import fs from 'fs-extra';
 import path from 'path';
@@ -85,7 +85,8 @@ export async function handleUse(
   // 更新项目配置
   const configFile = path.join(projectDir, 'tools-cc.json');
   const config = await fs.readJson(configFile);
-  config.links = tools;
+  const existingLinks = config.links || [];
+  config.links = [...new Set([...existingLinks, ...tools])];
   await fs.writeJson(configFile, config, { spaces: 2 });
 }
 
@@ -136,6 +137,7 @@ export async function handleStatus(): Promise<void> {
     console.log(`  Links:`);
     for (const tool of config.links || []) {
       const linkName = SUPPORTED_TOOLS[tool];
+      if (!linkName) continue;
       const linkPath = path.join(projectDir, linkName);
       const isLink = await isSymlink(linkPath);
       console.log(`    ${tool}: ${isLink ? chalk.green('linked') : chalk.red('not linked')}`);
