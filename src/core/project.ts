@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { ProjectConfig } from '../types';
+import { ProjectConfig, LegacyProjectConfig, normalizeProjectConfig } from '../types';
 import { loadManifest } from './manifest';
 import { getToolsccDir, getProjectConfigPath } from '../utils/path';
 
@@ -16,11 +16,26 @@ export async function initProject(projectDir: string): Promise<void> {
   // Create project config if not exists
   if (!(await fs.pathExists(configFile))) {
     const config: ProjectConfig = {
-      sources: [],
+      sources: {},
       links: []
     };
     await fs.writeJson(configFile, config, { spaces: 2 });
   }
+}
+
+/**
+ * 读取项目配置，自动处理新旧格式
+ */
+async function readProjectConfig(configFile: string): Promise<ProjectConfig> {
+  const rawConfig = await fs.readJson(configFile);
+  return normalizeProjectConfig(rawConfig);
+}
+
+/**
+ * 获取源名称列表（兼容新旧格式）
+ */
+function getSourceNames(config: ProjectConfig): string[] {
+  return Object.keys(config.sources);
 }
 
 export async function useSource(
@@ -79,9 +94,13 @@ export async function useSource(
 
   // Update project config
   const configFile = getProjectConfigPath(projectDir);
-  const config: ProjectConfig = await fs.readJson(configFile);
-  if (!config.sources.includes(sourceName)) {
-    config.sources.push(sourceName);
+  const config = await readProjectConfig(configFile);
+  if (!config.sources[sourceName]) {
+    config.sources[sourceName] = {
+      skills: ['*'],
+      commands: ['*'],
+      agents: ['*']
+    };
   }
   await fs.writeJson(configFile, config, { spaces: 2 });
 }
@@ -115,13 +134,13 @@ export async function unuseSource(sourceName: string, projectDir: string): Promi
   // Update project config with error handling
   let config: ProjectConfig;
   try {
-    config = await fs.readJson(configFile);
+    config = await readProjectConfig(configFile);
   } catch (error) {
     // If config file doesn't exist or is invalid, nothing to update
     return;
   }
 
-  config.sources = config.sources.filter(s => s !== sourceName);
+  delete config.sources[sourceName];
   await fs.writeJson(configFile, config, { spaces: 2 });
 }
 
@@ -132,6 +151,6 @@ export async function listUsedSources(projectDir: string): Promise<string[]> {
     return [];
   }
 
-  const config: ProjectConfig = await fs.readJson(configFile);
-  return config.sources;
+  const config = await readProjectConfig(configFile);
+  return getSourceNames(config);
 }

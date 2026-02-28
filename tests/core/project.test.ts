@@ -20,7 +20,7 @@ describe('Project Module', () => {
   it('should initialize project with .toolscc directory', async () => {
     await initProject(testProjectDir);
     expect(await fs.pathExists(path.join(testProjectDir, '.toolscc'))).toBe(true);
-    expect(await fs.pathExists(path.join(testProjectDir, 'tools-cc.json'))).toBe(true);
+    expect(await fs.pathExists(path.join(testProjectDir, '.toolscc', 'config.json'))).toBe(true);
   });
 
   it('should use source and copy components', async () => {
@@ -36,8 +36,8 @@ describe('Project Module', () => {
     await useSource('test-source', testSourceDir, testProjectDir);
     await unuseSource('test-source', testProjectDir);
     
-    const config = await fs.readJson(path.join(testProjectDir, 'tools-cc.json'));
-    expect(config.sources).not.toContain('test-source');
+    const config = await fs.readJson(path.join(testProjectDir, '.toolscc', 'config.json'));
+    expect(config.sources).not.toHaveProperty('test-source');
   });
 
   it('should list used sources', async () => {
