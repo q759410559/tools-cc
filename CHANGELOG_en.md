@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2026-02-28
+
+### Added
+- Added English version of project documentation README_en.md
+
+### Changed
+- Optimized project initialization and source synchronization logic
+
 ## [1.0.3] - 2026-02-26
 
 ### Changed
