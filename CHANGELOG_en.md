@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-02-28
+
+### Added
+- Added partial import feature: support path syntax to select specific skills/commands/agents
+  - `tools-cc use source:skills/xxx` import only specified skill
+  - `tools-cc use source:commands/` import all commands
+- Added `-ls` mode: `tools-cc use -ls` list source content without creating links
+- Added `tools-cc export` command: export project or global config to JSON file
+  - `tools-cc export` export project config
+  - `tools-cc export -g` export global config
+
+### Changed
+- Refactored `use` command to support path syntax and `-ls` mode
+- Refactored `useSource` core logic to support partial import
+
+### Removed
+- Removed temporary design and implementation docs (docs/plans directory)
+
 ## [1.0.4] - 2026-02-28
 
 ### Added

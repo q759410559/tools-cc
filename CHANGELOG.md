@@ -2,6 +2,24 @@
 
 本项目的所有重要变更都将记录在此文件中。
 
+## [1.0.5] - 2026-02-28
+
+### Added
+- 新增部分导入功能：支持路径语法选择特定的 skills/commands/agents
+  - `tools-cc use source:skills/xxx` 只导入指定 skill
+  - `tools-cc use source:commands/` 导入所有 commands
+- 新增 `-ls` 模式：`tools-cc use -ls` 列出源内容而不创建链接
+- 新增 `tools-cc export` 命令：导出项目或全局配置到 JSON 文件
+  - `tools-cc export` 导出项目配置
+  - `tools-cc export -g` 导出全局配置
+
+### Changed
+- 重构 `use` 命令，支持路径语法和 `-ls` 模式
+- 重构 `useSource` 核心逻辑，支持部分导入
+
+### Removed
+- 删除临时设计和实现文档 (docs/plans 目录)
+
 ## [1.0.4] - 2026-02-28
 
 ### Added
