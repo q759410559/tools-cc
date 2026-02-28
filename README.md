@@ -100,10 +100,25 @@ tools-cc sources scan                     # 扫描 sourcesDir 目录，自动发
 
 ```bash
 tools-cc use [sources...] [-p tools...]   # 启用配置源并创建符号链接
+tools-cc use . [-p tools...]              # 使用当前项目已配置的源，只创建符号链接
 tools-cc update [sources...]              # 同步配置源内容到项目 .toolscc 目录
 tools-cc list                             # 列出已启用的配置源
 tools-cc rm <source>                      # 禁用配置源
 tools-cc status                           # 查看项目状态
+```
+
+#### `use` 命令详解
+
+```bash
+# 启用指定的配置源并创建链接
+tools-cc use my-skills -p iflow claude
+
+# 使用 "." 表示当前项目已配置的源（只创建链接，不复制内容）
+tools-cc use . -p iflow claude
+
+# 不指定工具时，默认创建所有支持的链接
+tools-cc use my-skills
+tools-cc use .
 ```
 
 ### Config 管理

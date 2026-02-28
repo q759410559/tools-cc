@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { handleConfigSet, handleConfigGet, handleConfigList } from './commands/config';
 import { handleSourceAdd, handleSourceList, handleSourceRemove, handleSourceUpdate, handleSourceScan } from './commands/source';
 import { handleUse, handleList, handleRemove, handleStatus, handleProjectUpdate } from './commands/use';
+import { handleExport } from './commands/export';
 import { showHelp } from './commands/help';
 import { GLOBAL_CONFIG_DIR } from './utils/path';
 
@@ -124,6 +125,15 @@ program
   .description('Update source(s) in current project')
   .action(async (sources: string[]) => {
     await handleProjectUpdate(sources);
+  });
+
+program
+  .command('export')
+  .description('Export project or global config')
+  .option('-o, --output <file>', 'Output file path')
+  .option('--global', 'Export global config')
+  .action(async (options) => {
+    await handleExport(options);
   });
 
 // Help command

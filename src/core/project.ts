@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { ProjectConfig, LegacyProjectConfig, normalizeProjectConfig, SourceSelection } from '../types';
+import { ProjectConfig, LegacyProjectConfig, normalizeProjectConfig, SourceSelection, ExportConfig } from '../types';
 import { loadManifest } from './manifest';
 import { getToolsccDir, getProjectConfigPath } from '../utils/path';
 
@@ -207,4 +207,71 @@ export async function listUsedSources(projectDir: string): Promise<string[]> {
 
   const config = await readProjectConfig(configFile);
   return getSourceNames(config);
+}
+
+/**
+ * 导出项目配置到 JSON 文件
+ */
+export async function exportProjectConfig(
+  projectDir: string,
+  outputPath: string
+): Promise<void> {
+  const configFile = getProjectConfigPath(projectDir);
+
+  if (!(await fs.pathExists(configFile))) {
+    throw new Error('Project not initialized. Use `tools-cc use <source>` to get started.');
+  }
+
+  const config = await readProjectConfig(configFile);
+
+  const exportConfig: ExportConfig = {
+    version: '1.0',
+    type: 'project',
+    config,
+    exportedAt: new Date().toISOString()
+  };
+
+  await fs.writeJson(outputPath, exportConfig, { spaces: 2 });
+}
+
+/**
+ * 从 JSON 文件导入项目配置
+ */
+export async function importProjectConfig(
+  configPath: string,
+  projectDir: string,
+  resolveSourcePath: (sourceName: string) => Promise<string>
+): Promise<void> {
+  if (!(await fs.pathExists(configPath))) {
+    throw new Error(`Config file not found: ${configPath}`);
+  }
+
+  const exportConfig: ExportConfig = await fs.readJson(configPath);
+
+  // Validate version
+  if (exportConfig.version !== '1.0') {
+    throw new Error(`Unsupported config version: ${exportConfig.version}`);
+  }
+
+  // Validate type
+  if (exportConfig.type !== 'project') {
+    throw new Error(`Invalid config type: ${exportConfig.type}. Expected 'project'.`);
+  }
+
+  // Initialize project
+  await initProject(projectDir);
+
+  // Apply each source
+  for (const [sourceName, selection] of Object.entries(exportConfig.config.sources)) {
+    const sourceDir = await resolveSourcePath(sourceName);
+    await useSource(sourceName, sourceDir, projectDir, selection);
+  }
+
+  // Update links if present
+  if (exportConfig.config.links && exportConfig.config.links.length > 0) {
+    const configFile = getProjectConfigPath(projectDir);
+    const config = await readProjectConfig(configFile);
+    config.links = exportConfig.config.links;
+    await fs.writeJson(configFile, config, { spaces: 2 });
+  }
 }

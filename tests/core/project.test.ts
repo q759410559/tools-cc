@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs-extra';
 import path from 'path';
-import { initProject, useSource, unuseSource, listUsedSources } from '../../src/core/project';
-import { SourceSelection } from '../../src/types/config';
+import { initProject, useSource, unuseSource, listUsedSources, exportProjectConfig, importProjectConfig } from '../../src/core/project';
+import { SourceSelection, ExportConfig } from '../../src/types/config';
 
 describe('Project Module', () => {
   const testProjectDir = path.join(__dirname, '../fixtures/test-project');
@@ -188,5 +188,130 @@ describe('Partial Import', () => {
       commands: ['*'],
       agents: ['*']
     });
+  });
+});
+
+describe('Export/Import Project Config', () => {
+  const testProjectDir = path.join(__dirname, '../fixtures/test-export-project');
+  const testSourceDir = path.join(__dirname, '../fixtures/test-export-source');
+  const exportFilePath = path.join(__dirname, '../fixtures/test-export.json');
+
+  beforeEach(async () => {
+    // Create test source with multiple skills, commands, and agents
+    await fs.ensureDir(path.join(testSourceDir, 'skills', 'skill-a'));
+    await fs.ensureDir(path.join(testSourceDir, 'skills', 'skill-b'));
+    await fs.ensureDir(path.join(testSourceDir, 'commands'));
+    await fs.ensureDir(path.join(testSourceDir, 'agents'));
+    
+    // Create command files
+    await fs.writeFile(path.join(testSourceDir, 'commands', 'cmd1.md'), '# cmd1');
+    await fs.writeFile(path.join(testSourceDir, 'commands', 'cmd2.md'), '# cmd2');
+    
+    // Create agent files
+    await fs.writeFile(path.join(testSourceDir, 'agents', 'agent1.md'), '# agent1');
+    
+    // Create skill files
+    await fs.writeFile(path.join(testSourceDir, 'skills', 'skill-a', 'test.md'), '# skill-a');
+    await fs.writeFile(path.join(testSourceDir, 'skills', 'skill-b', 'test.md'), '# skill-b');
+  });
+
+  afterEach(async () => {
+    await fs.remove(testProjectDir);
+    await fs.remove(testSourceDir);
+    await fs.remove(exportFilePath);
+  });
+
+  it('should export project config to JSON file with version 1.0', async () => {
+    // Initialize and add sources
+    await initProject(testProjectDir);
+    
+    const selection: SourceSelection = {
+      skills: ['skill-a'],
+      commands: ['cmd1'],
+      agents: ['*']
+    };
+    
+    await useSource('export-source', testSourceDir, testProjectDir, selection);
+    
+    // Export config
+    await exportProjectConfig(testProjectDir, exportFilePath);
+    
+    // Verify export file exists
+    expect(await fs.pathExists(exportFilePath)).toBe(true);
+    
+    // Verify export content
+    const exported: ExportConfig = await fs.readJson(exportFilePath);
+    expect(exported.version).toBe('1.0');
+    expect(exported.type).toBe('project');
+    expect(exported.config).toBeDefined();
+    expect(exported.config.sources['export-source']).toEqual(selection);
+    expect(exported.exportedAt).toBeDefined();
+  });
+
+  it('should import config and apply sources', async () => {
+    // Create export file first
+    const exportConfig: ExportConfig = {
+      version: '1.0',
+      type: 'project',
+      config: {
+        sources: {
+          'import-source': {
+            skills: ['skill-b'],
+            commands: ['cmd2'],
+            agents: []
+          }
+        },
+        links: []
+      },
+      exportedAt: new Date().toISOString()
+    };
+    await fs.writeJson(exportFilePath, exportConfig, { spaces: 2 });
+    
+    // Import config
+    const resolveSourcePath = async (sourceName: string) => {
+      if (sourceName === 'import-source') {
+        return testSourceDir;
+      }
+      throw new Error(`Unknown source: ${sourceName}`);
+    };
+    
+    await importProjectConfig(exportFilePath, testProjectDir, resolveSourcePath);
+    
+    // Verify project config was applied
+    const config = await fs.readJson(path.join(testProjectDir, '.toolscc', 'config.json'));
+    expect(config.sources['import-source']).toEqual({
+      skills: ['skill-b'],
+      commands: ['cmd2'],
+      agents: []
+    });
+    
+    // Verify files were copied
+    expect(await fs.pathExists(path.join(testProjectDir, '.toolscc', 'skills', 'import-source-skill-b'))).toBe(true);
+    expect(await fs.pathExists(path.join(testProjectDir, '.toolscc', 'commands', 'import-source', 'cmd2.md'))).toBe(true);
+  });
+
+  it('should reject unsupported version on import', async () => {
+    // Create export file with unsupported version
+    const exportConfig = {
+      version: '2.0',
+      type: 'project',
+      config: {
+        sources: {},
+        links: []
+      },
+      exportedAt: new Date().toISOString()
+    };
+    await fs.writeJson(exportFilePath, exportConfig, { spaces: 2 });
+    
+    const resolveSourcePath = async () => testSourceDir;
+    
+    await expect(importProjectConfig(exportFilePath, testProjectDir, resolveSourcePath))
+      .rejects.toThrow('Unsupported config version: 2.0');
+  });
+
+  it('should throw error when exporting non-initialized project', async () => {
+    // Don't initialize project
+    await expect(exportProjectConfig(testProjectDir, exportFilePath))
+      .rejects.toThrow();
   });
 });

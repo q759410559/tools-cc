@@ -24,3 +24,7 @@ Thumbs.db
 .toolscc/tools-cc.json
 *.local.json
 /.iflow
+/findings.md
+/progress.md
+/task_plan.md
+/docs/

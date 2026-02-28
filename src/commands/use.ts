@@ -19,61 +19,85 @@ export async function handleUse(
   options: { projects?: string[] }
 ): Promise<void> {
   const projectDir = process.cwd();
-  
-  // 如果没有指定 source，进入交互模式
-  if (sourceNames.length === 0) {
-    const sources = await listSources(GLOBAL_CONFIG_DIR);
-    const sourceList = Object.keys(sources);
-    
-    if (sourceList.length === 0) {
-      console.log(chalk.yellow('No sources configured. Use `tools-cc -s add` to add one.'));
+  const toolsccDir = getToolsccDir(projectDir);
+  const configFile = getProjectConfigPath(projectDir);
+
+  // 检测是否为 "." 模式：使用当前项目已配置的源
+  const isDotMode = sourceNames.length === 1 && sourceNames[0] === '.';
+
+  if (isDotMode) {
+    // "." 模式：只创建符号链接，不复制源内容
+    if (!(await fs.pathExists(configFile))) {
+      console.log(chalk.yellow('Project not initialized. Run `tools-cc use <source>` first.'));
       return;
     }
-    
-    const answers = await inquirer.prompt([
-      {
-        type: 'checkbox',
-        name: 'selectedSources',
-        message: 'Select sources to use:',
-        choices: sourceList
+
+    const config = await fs.readJson(configFile);
+    const configuredSources = config.sources || [];
+
+    if (configuredSources.length === 0) {
+      console.log(chalk.yellow('No sources configured in this project. Run `tools-cc use <source>` to add one.'));
+      return;
+    }
+
+    console.log(chalk.cyan(`Using existing sources: ${configuredSources.join(', ')}`));
+  } else {
+    // 原有逻辑：从全局源复制内容
+
+    // 如果没有指定 source，进入交互模式
+    if (sourceNames.length === 0) {
+      const sources = await listSources(GLOBAL_CONFIG_DIR);
+      const sourceList = Object.keys(sources);
+
+      if (sourceList.length === 0) {
+        console.log(chalk.yellow('No sources configured. Use `tools-cc -s add` to add one.'));
+        return;
       }
-    ]);
-    
-    sourceNames = answers.selectedSources;
-  }
-  
-  if (sourceNames.length === 0) {
-    console.log(chalk.gray('No sources selected.'));
-    return;
-  }
-  
-  // 初始化项目
-  await initProject(projectDir);
-  
-  // 启用每个配置源
-  for (const sourceName of sourceNames) {
-    try {
-      const sourcePath = await getSourcePath(sourceName, GLOBAL_CONFIG_DIR);
-      await useSource(sourceName, sourcePath, projectDir);
-      console.log(chalk.green(`✓ Using source: ${sourceName}`));
-    } catch (error) {
-      console.log(chalk.red(`✗ Failed to use ${sourceName}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+
+      const answers = await inquirer.prompt([
+        {
+          type: 'checkbox',
+          name: 'selectedSources',
+          message: 'Select sources to use:',
+          choices: sourceList
+        }
+      ]);
+
+      sourceNames = answers.selectedSources;
+    }
+
+    if (sourceNames.length === 0) {
+      console.log(chalk.gray('No sources selected.'));
+      return;
+    }
+
+    // 初始化项目
+    await initProject(projectDir);
+
+    // 启用每个配置源
+    for (const sourceName of sourceNames) {
+      try {
+        const sourcePath = await getSourcePath(sourceName, GLOBAL_CONFIG_DIR);
+        await useSource(sourceName, sourcePath, projectDir);
+        console.log(chalk.green(`✓ Using source: ${sourceName}`));
+      } catch (error) {
+        console.log(chalk.red(`✗ Failed to use ${sourceName}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+      }
     }
   }
-  
-  // 创建符号链接
+
+  // 创建符号链接（两种模式共用）
   const tools = options.projects || Object.keys(SUPPORTED_TOOLS);
-  const toolsccDir = getToolsccDir(projectDir);
-  
+
   for (const tool of tools) {
     const linkName = SUPPORTED_TOOLS[tool];
     if (!linkName) {
       console.log(chalk.yellow(`Unknown tool: ${tool}`));
       continue;
     }
-    
+
     const linkPath = path.join(projectDir, linkName);
-    
+
     try {
       await createSymlink(toolsccDir, linkPath, true);
       console.log(chalk.green(`✓ Linked: ${linkName} -> .toolscc`));
@@ -81,9 +105,8 @@ export async function handleUse(
       console.log(chalk.red(`✗ Failed to link ${linkName}: ${error instanceof Error ? error.message : 'Unknown error'}`));
     }
   }
-  
+
   // 更新项目配置
-  const configFile = getProjectConfigPath(projectDir);
   const config = await fs.readJson(configFile);
   const existingLinks = config.links || [];
   config.links = [...new Set([...existingLinks, ...tools])];
