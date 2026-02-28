@@ -11,7 +11,11 @@
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "publish:npm": "npm publish",
+    "tag:create": "git tag v%npm_package_version% && git push github v%npm_package_version%",
+    "release:gh": "gh release create v%npm_package_version% --title v%npm_package_version% --generate-notes",
+    "release": "npm run publish:npm && npm run tag:create && npm run release:gh"
   },
   "bin": {
     "tools-cc": "./dist/index.js"
