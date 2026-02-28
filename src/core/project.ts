@@ -7,12 +7,12 @@ import { getToolsccDir, getProjectConfigPath } from '../utils/path';
 export async function initProject(projectDir: string): Promise<void> {
   const toolsccDir = getToolsccDir(projectDir);
   const configFile = getProjectConfigPath(projectDir);
-  
+
   // Create .toolscc directory structure
   await fs.ensureDir(path.join(toolsccDir, 'skills'));
   await fs.ensureDir(path.join(toolsccDir, 'commands'));
   await fs.ensureDir(path.join(toolsccDir, 'agents'));
-  
+
   // Create project config if not exists
   if (!(await fs.pathExists(configFile))) {
     const config: ProjectConfig = {
@@ -32,34 +32,35 @@ export async function useSource(
   if (!sourceName || !sourceName.trim()) {
     throw new Error('Source name is required');
   }
-  
+
   // Check source directory existence
   if (!(await fs.pathExists(sourceDir))) {
     throw new Error(`Source directory does not exist: ${sourceDir}`);
   }
-  
+
   const toolsccDir = getToolsccDir(projectDir);
   const manifest = await loadManifest(sourceDir);
-  
+
   // Ensure project is initialized
   await initProject(projectDir);
-  
+
   // Copy/link skills (flattened with prefix)
   const sourceSkillsDir = path.join(sourceDir, 'skills');
   if (await fs.pathExists(sourceSkillsDir)) {
     const skills = await fs.readdir(sourceSkillsDir);
     for (const skill of skills) {
       const srcPath = path.join(sourceSkillsDir, skill);
-      const destPath = path.join(toolsccDir, 'skills', `${sourceName}-${skill}`);
-      
+      const name = `${sourceName}` == `${skill}` ? skill : `${sourceName}-${skill}`;
+      const destPath = path.join(toolsccDir, 'skills', name);
+
       // Remove existing if exists
       await fs.remove(destPath);
-      
+
       // Copy directory
       await fs.copy(srcPath, destPath);
     }
   }
-  
+
   // Copy commands (in subdirectory by source name)
   const sourceCommandsDir = path.join(sourceDir, 'commands');
   if (await fs.pathExists(sourceCommandsDir)) {
@@ -67,7 +68,7 @@ export async function useSource(
     await fs.remove(destDir);
     await fs.copy(sourceCommandsDir, destDir);
   }
-  
+
   // Copy agents (in subdirectory by source name)
   const sourceAgentsDir = path.join(sourceDir, 'agents');
   if (await fs.pathExists(sourceAgentsDir)) {
@@ -75,7 +76,7 @@ export async function useSource(
     await fs.remove(destDir);
     await fs.copy(sourceAgentsDir, destDir);
   }
-  
+
   // Update project config
   const configFile = getProjectConfigPath(projectDir);
   const config: ProjectConfig = await fs.readJson(configFile);
@@ -90,10 +91,10 @@ export async function unuseSource(sourceName: string, projectDir: string): Promi
   if (!sourceName || !sourceName.trim()) {
     throw new Error('Source name is required');
   }
-  
+
   const toolsccDir = getToolsccDir(projectDir);
   const configFile = getProjectConfigPath(projectDir);
-  
+
   // Remove skills with prefix
   const skillsDir = path.join(toolsccDir, 'skills');
   if (await fs.pathExists(skillsDir)) {
@@ -104,13 +105,13 @@ export async function unuseSource(sourceName: string, projectDir: string): Promi
       }
     }
   }
-  
+
   // Remove commands subdirectory
   await fs.remove(path.join(toolsccDir, 'commands', sourceName));
-  
+
   // Remove agents subdirectory
   await fs.remove(path.join(toolsccDir, 'agents', sourceName));
-  
+
   // Update project config with error handling
   let config: ProjectConfig;
   try {
@@ -119,18 +120,18 @@ export async function unuseSource(sourceName: string, projectDir: string): Promi
     // If config file doesn't exist or is invalid, nothing to update
     return;
   }
-  
+
   config.sources = config.sources.filter(s => s !== sourceName);
   await fs.writeJson(configFile, config, { spaces: 2 });
 }
 
 export async function listUsedSources(projectDir: string): Promise<string[]> {
   const configFile = getProjectConfigPath(projectDir);
-  
+
   if (!(await fs.pathExists(configFile))) {
     return [];
   }
-  
+
   const config: ProjectConfig = await fs.readJson(configFile);
   return config.sources;
 }
