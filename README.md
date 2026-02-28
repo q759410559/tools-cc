@@ -36,6 +36,13 @@ tools-cc -s list
 cd my-project
 tools-cc use my-skills -p iflow claude
 
+# 4a. 或使用部分引入（只引入需要的 skills/commands/agents）
+tools-cc use my-skills/skills/a-skill
+tools-cc use my-skills -ls                 # 交互式选择
+
+# 4b. 或从配置文件快速导入
+tools-cc use -c project-config.json
+
 # 5. 查看项目状态
 tools-cc status
 
@@ -99,26 +106,47 @@ tools-cc sources scan                     # 扫描 sourcesDir 目录，自动发
 ### 项目配置
 
 ```bash
-tools-cc use [sources...] [-p tools...]   # 启用配置源并创建符号链接
-tools-cc use . [-p tools...]              # 使用当前项目已配置的源，只创建符号链接
+tools-cc use [sources...] [options]       # 启用配置源并创建符号链接
 tools-cc update [sources...]              # 同步配置源内容到项目 .toolscc 目录
 tools-cc list                             # 列出已启用的配置源
 tools-cc rm <source>                      # 禁用配置源
 tools-cc status                           # 查看项目状态
+tools-cc export [options]                 # 导出项目或全局配置
 ```
 
 #### `use` 命令详解
 
 ```bash
-# 启用指定的配置源并创建链接
-tools-cc use my-skills -p iflow claude
+# 整源引入（全部 skills/commands/agents）
+tools-cc use my-skills
+tools-cc use my-skills -p iflow claude    # 指定工具链接
+
+# 部分引入（路径语法）
+tools-cc use my-skills/skills/a-skill     # 引入单个 skill
+tools-cc use my-skills/commands/test      # 引入单个 command
+tools-cc use my-skills/agents/reviewer    # 引入单个 agent
+tools-cc use my-skills/skills/a my-skills/commands/test  # 引入多项
+
+# 交互式选择（-ls 参数）
+tools-cc use my-skills -ls                # 分组展示，勾选引入
+
+# 从配置文件导入
+tools-cc use -c project-config.json       # 快速恢复项目配置
 
 # 使用 "." 表示当前项目已配置的源（只创建链接，不复制内容）
 tools-cc use . -p iflow claude
+```
 
-# 不指定工具时，默认创建所有支持的链接
-tools-cc use my-skills
-tools-cc use .
+#### `export` 命令详解
+
+```bash
+# 导出项目配置（包含具体选择）
+tools-cc export                           # 导出到 .toolscc-export.json
+tools-cc export -o my-config.json         # 指定输出路径
+
+# 导出全局配置
+tools-cc export --global                  # 导出到 .toolscc-global-export.json
+tools-cc export --global -o global.json   # 指定输出路径
 ```
 
 ### Config 管理
@@ -223,9 +251,21 @@ my-project/
 
 ```json
 {
-  "sources": ["my-skills"],
+  "sources": {
+    "my-skills": {
+      "skills": ["a-skill", "b-skill"],
+      "commands": ["test"],
+      "agents": ["*"]
+    }
+  },
   "links": ["iflow", "claude"]
 }
+```
+
+**说明：**
+- `sources` 记录每个源具体引入了哪些内容
+- `["*"]` 表示引入该类型全部内容
+- `[]` 表示不引入该类型任何内容
 ```
 
 ## 许可证
