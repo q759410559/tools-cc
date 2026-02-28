@@ -1,8 +1,17 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { ProjectConfig, LegacyProjectConfig, normalizeProjectConfig } from '../types';
+import { ProjectConfig, LegacyProjectConfig, normalizeProjectConfig, SourceSelection } from '../types';
 import { loadManifest } from './manifest';
 import { getToolsccDir, getProjectConfigPath } from '../utils/path';
+
+/**
+ * 默认选择配置 - 导入所有内容
+ */
+const DEFAULT_SELECTION: SourceSelection = {
+  skills: ['*'],
+  commands: ['*'],
+  agents: ['*']
+};
 
 export async function initProject(projectDir: string): Promise<void> {
   const toolsccDir = getToolsccDir(projectDir);
@@ -38,10 +47,23 @@ function getSourceNames(config: ProjectConfig): string[] {
   return Object.keys(config.sources);
 }
 
+/**
+ * 检查是否应该复制某项（根据选择配置）
+ */
+function shouldInclude(itemName: string, selection: string[]): boolean {
+  // 如果选择包含通配符，包含所有项
+  if (selection.includes('*')) {
+    return true;
+  }
+  // 否则检查是否在选择列表中
+  return selection.includes(itemName);
+}
+
 export async function useSource(
   sourceName: string,
   sourceDir: string,
-  projectDir: string
+  projectDir: string,
+  selection?: SourceSelection
 ): Promise<void> {
   // Input validation
   if (!sourceName || !sourceName.trim()) {
@@ -59,11 +81,19 @@ export async function useSource(
   // Ensure project is initialized
   await initProject(projectDir);
 
+  // 使用传入的选择配置或默认配置
+  const effectiveSelection: SourceSelection = selection ?? DEFAULT_SELECTION;
+
   // Copy/link skills (flattened with prefix)
   const sourceSkillsDir = path.join(sourceDir, 'skills');
   if (await fs.pathExists(sourceSkillsDir)) {
     const skills = await fs.readdir(sourceSkillsDir);
     for (const skill of skills) {
+      // 检查是否应该包含此 skill
+      if (!shouldInclude(skill, effectiveSelection.skills)) {
+        continue;
+      }
+
       const srcPath = path.join(sourceSkillsDir, skill);
       const name = `${sourceName}` == `${skill}` ? skill : `${sourceName}-${skill}`;
       const destPath = path.join(toolsccDir, 'skills', name);
@@ -79,29 +109,53 @@ export async function useSource(
   // Copy commands (in subdirectory by source name)
   const sourceCommandsDir = path.join(sourceDir, 'commands');
   if (await fs.pathExists(sourceCommandsDir)) {
-    const destDir = path.join(toolsccDir, 'commands', sourceName);
-    await fs.remove(destDir);
-    await fs.copy(sourceCommandsDir, destDir);
+    // 检查是否有选择 commands
+    if (effectiveSelection.commands.includes('*')) {
+      // 复制所有 commands
+      const destDir = path.join(toolsccDir, 'commands', sourceName);
+      await fs.remove(destDir);
+      await fs.copy(sourceCommandsDir, destDir);
+    } else if (effectiveSelection.commands.length > 0) {
+      // 只复制选中的 commands
+      const destDir = path.join(toolsccDir, 'commands', sourceName);
+      await fs.ensureDir(destDir);
+      
+      for (const cmdName of effectiveSelection.commands) {
+        const srcFile = path.join(sourceCommandsDir, `${cmdName}.md`);
+        if (await fs.pathExists(srcFile)) {
+          await fs.copy(srcFile, path.join(destDir, `${cmdName}.md`));
+        }
+      }
+    }
   }
 
   // Copy agents (in subdirectory by source name)
   const sourceAgentsDir = path.join(sourceDir, 'agents');
   if (await fs.pathExists(sourceAgentsDir)) {
-    const destDir = path.join(toolsccDir, 'agents', sourceName);
-    await fs.remove(destDir);
-    await fs.copy(sourceAgentsDir, destDir);
+    // 检查是否有选择 agents
+    if (effectiveSelection.agents.includes('*')) {
+      // 复制所有 agents
+      const destDir = path.join(toolsccDir, 'agents', sourceName);
+      await fs.remove(destDir);
+      await fs.copy(sourceAgentsDir, destDir);
+    } else if (effectiveSelection.agents.length > 0) {
+      // 只复制选中的 agents
+      const destDir = path.join(toolsccDir, 'agents', sourceName);
+      await fs.ensureDir(destDir);
+      
+      for (const agentName of effectiveSelection.agents) {
+        const srcFile = path.join(sourceAgentsDir, `${agentName}.md`);
+        if (await fs.pathExists(srcFile)) {
+          await fs.copy(srcFile, path.join(destDir, `${agentName}.md`));
+        }
+      }
+    }
   }
 
-  // Update project config
+  // Update project config - 保存实际使用的选择配置
   const configFile = getProjectConfigPath(projectDir);
   const config = await readProjectConfig(configFile);
-  if (!config.sources[sourceName]) {
-    config.sources[sourceName] = {
-      skills: ['*'],
-      commands: ['*'],
-      agents: ['*']
-    };
-  }
+  config.sources[sourceName] = effectiveSelection;
   await fs.writeJson(configFile, config, { spaces: 2 });
 }
 
