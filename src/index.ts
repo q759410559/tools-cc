@@ -95,6 +95,8 @@ program
   .command('use [sources...]')
   .description('Use sources in current project')
   .option('-p, --projects <tools...>', 'Tools to link (iflow, claude, codebuddy, opencode)')
+  .option('-ls', 'Interactive selection mode for single source')
+  .option('-c, --config <file>', 'Import from config file')
   .action(async (sources: string[], options) => {
     await handleUse(sources, options);
   });
