@@ -34,7 +34,8 @@ tools-cc -s list
 
 # 4. Enable configuration sources in a project and create links
 cd my-project
-tools-cc use my-skills -p iflow claude
+tools-cc use                              # Interactive source selection
+tools-cc use my-skills -p iflow claude codex
 
 # 5. View project status
 tools-cc status
@@ -99,11 +100,50 @@ tools-cc sources scan                     # Scan sourcesDir to auto-discover and
 ### Project Configuration
 
 ```bash
-tools-cc use [sources...] [-p tools...]   # Enable configuration sources and create symbolic links
+tools-cc use [sources...] [options]       # Enable configuration sources and create symbolic links
 tools-cc update [sources...]              # Sync configuration source content to project .toolscc directory
 tools-cc list                             # List enabled configuration sources
 tools-cc rm <source>                      # Disable configuration source
 tools-cc status                           # View project status
+tools-cc export [options]                 # Export project or global config
+```
+
+#### `use` Command Details
+
+```bash
+# No arguments: interactive source selection
+tools-cc use                               # Show available sources for selection
+
+# Full source import (all skills/commands/agents)
+tools-cc use my-skills
+tools-cc use my-skills -p iflow claude codex    # Specify tool links
+
+# Partial import (path syntax)
+tools-cc use my-skills/skills/a-skill     # Import single skill
+tools-cc use my-skills/commands/test      # Import single command
+tools-cc use my-skills/agents/reviewer    # Import single agent
+tools-cc use my-skills/skills/a my-skills/commands/test  # Import multiple
+
+# Interactive content selection (--ls flag)
+tools-cc use my-skills --ls               # Grouped display, checkbox selection
+
+# Import from config file
+tools-cc use -c project-config.json       # Quick restore project config
+
+# Use "." for existing project sources (only create links, no copy)
+tools-cc use . -p iflow claude codex
+```
+
+#### `export` Command Details
+
+```bash
+# Export project config
+tools-cc export                           # Export to .toolscc-export.json
+tools-cc export -o my-config.json         # Specify output path
+
+# Export global config
+tools-cc export --global                  # Export to .toolscc-global-export.json
+tools-cc export --global -o global.json   # Specify output path
 ```
 
 ### Config Management
@@ -135,6 +175,7 @@ tools-cc --version                        # Display version number
 | claude | `.claude` |
 | codebuddy | `.codebuddy` |
 | opencode | `.opencode` |
+| codex | `.codex` |
 
 ## Configuration Source Structure
 
@@ -208,10 +249,21 @@ my-project/
 
 ```json
 {
-  "sources": ["my-skills"],
-  "links": ["iflow", "claude"]
+  "sources": {
+    "my-skills": {
+      "skills": ["a-skill", "b-skill"],
+      "commands": ["test"],
+      "agents": ["*"]
+    }
+  },
+  "links": ["iflow", "claude", "codex"]
 }
 ```
+
+**Notes:**
+- `sources` records specific content imported from each source
+- `["*"]` means import all content of that type
+- `[]` means import nothing of that type
 
 ## License
 

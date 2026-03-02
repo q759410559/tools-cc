@@ -36,11 +36,14 @@ tools-cc -s list
 cd my-project
 tools-cc use my-skills -p iflow claude codex
 
-# 4a. 或使用部分引入（只引入需要的 skills/commands/agents）
-tools-cc use my-skills/skills/a-skill
-tools-cc use my-skills --ls                # 交互式选择
+# 4a. 无参数运行，交互式选择源
+tools-cc use                               # 显示源列表供选择
 
-# 4b. 或从配置文件快速导入
+# 4b. 或使用部分引入（只引入需要的 skills/commands/agents）
+tools-cc use my-skills/skills/a-skill
+tools-cc use my-skills --ls                # 交互式选择内容
+
+# 4c. 或从配置文件快速导入
 tools-cc use -c project-config.json
 
 # 5. 查看项目状态
@@ -117,6 +120,9 @@ tools-cc export [options]                 # 导出项目或全局配置
 #### `use` 命令详解
 
 ```bash
+# 无参数运行：交互式选择源
+tools-cc use                               # 显示可用源列表供选择
+
 # 整源引入（全部 skills/commands/agents）
 tools-cc use my-skills
 tools-cc use my-skills -p iflow claude codex    # 指定工具链接
@@ -127,7 +133,7 @@ tools-cc use my-skills/commands/test      # 引入单个 command
 tools-cc use my-skills/agents/reviewer    # 引入单个 agent
 tools-cc use my-skills/skills/a my-skills/commands/test  # 引入多项
 
-# 交互式选择（--ls 参数）
+# 交互式选择内容（--ls 参数）
 tools-cc use my-skills --ls               # 分组展示，勾选引入
 
 # 从配置文件导入

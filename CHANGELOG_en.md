@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.6] - 2026-03-02
+
+### Added
+- Added interactive source selection: `tools-cc use` without arguments shows source list for selection
+- Added config import feature: `tools-cc use -c config.json` to quickly restore project config from exported file
+
+### Changed
+- Refactored `use` command to support multiple modes (config import, interactive selection, path syntax, full import, dot mode)
+- Improved interactive selection mode with grouped display of skills/commands/agents
+
 ## [1.0.5] - 2026-02-28
 
 ### Added
