@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { useSource, unuseSource, listUsedSources, initProject, importProjectConfig } from '../core/project';
+import { normalizeProjectConfig } from '../types/config';
 import { getSourcePath, listSources } from '../core/source';
 import { scanSource } from '../core/manifest';
 import { createSymlink, isSymlink } from '../core/symlink';
@@ -368,11 +369,16 @@ export async function handleProjectUpdate(sourceNames?: string[]): Promise<void>
     return;
   }
   
-  const config = await fs.readJson(configFile);
+  const rawConfig = await fs.readJson(configFile);
+  // 使用 normalizeProjectConfig 处理旧版（数组）和新版（对象）格式
+  const config = normalizeProjectConfig(rawConfig);
   const configuredSources = Object.keys(config.sources || {});
   
-  let sourcesToUpdate = sourceNames && sourceNames.length > 0 
-    ? sourceNames 
+  // 过滤掉无效的源名称（如数字字符串），这些可能是 Commander.js 解析错误产生的
+  const validSourceNames = sourceNames?.filter(s => isNaN(Number(s))) || [];
+  
+  let sourcesToUpdate = validSourceNames.length > 0 
+    ? validSourceNames 
     : configuredSources;
   
   if (sourcesToUpdate.length === 0) {
@@ -380,9 +386,9 @@ export async function handleProjectUpdate(sourceNames?: string[]): Promise<void>
     return;
   }
   
-  // 验证指定的源是否存在于项目配置中
-  if (sourceNames && sourceNames.length > 0) {
-    const invalidSources = sourceNames.filter((s: string) => !configuredSources.includes(s));
+  // 验证指定的源是否存在于项目配置中（仅当用户明确指定了有效源名称时）
+  if (validSourceNames.length > 0) {
+    const invalidSources = validSourceNames.filter((s: string) => !configuredSources.includes(s));
     if (invalidSources.length > 0) {
       console.log(chalk.yellow(`Sources not in project: ${invalidSources.join(', ')}`));
     }

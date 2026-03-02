@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.7] - 2026-03-02
+
+### Fixed
+- Fixed `tools-cc update` command failing to recognize legacy array format config (sources array was incorrectly parsed as indices)
+
+### Changed
+- Updated help documentation with improved command descriptions and examples
+
 ## [1.0.6] - 2026-03-02
 
 ### Added
