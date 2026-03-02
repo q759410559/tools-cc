@@ -9,7 +9,7 @@ ${chalk.bold.cyan('════════════════════�
 
 ${chalk.bold('DESCRIPTION / 描述')}
   A CLI tool for managing skills/commands/agents configurations across multiple
-  AI coding tools (iflow, claude, codebuddy, opencode, etc.) via symlinks.
+  AI coding tools (iflow, claude, codebuddy, opencode, codex, etc.) via symlinks.
   
   一个用于统一管理多个 AI 编程工具配置的命令行工具，通过符号链接机制避免重复配置。
 
@@ -50,6 +50,7 @@ ${chalk.bold('SUPPORTED TOOLS / 支持的工具')}
   claude     → .claude
   codebuddy  → .codebuddy
   opencode   → .opencode
+  codex      → .codex
 
 ${chalk.bold('EXAMPLES / 示例')}
   ${chalk.gray('# Add a git source / 添加 Git 配置源')}
@@ -62,7 +63,7 @@ ${chalk.bold('EXAMPLES / 示例')}
   tools-cc sources list
 
   ${chalk.gray('# Use sources in project / 在项目中启用配置源')}
-  tools-cc use my-skills -p iflow claude
+  tools-cc use my-skills -p iflow claude codex
 
   ${chalk.gray('# Check project status / 检查项目状态')}
   tools-cc status

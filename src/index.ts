@@ -6,7 +6,6 @@ import { handleSourceAdd, handleSourceList, handleSourceRemove, handleSourceUpda
 import { handleUse, handleList, handleRemove, handleStatus, handleProjectUpdate } from './commands/use';
 import { handleExport } from './commands/export';
 import { showHelp } from './commands/help';
-import { GLOBAL_CONFIG_DIR } from './utils/path';
 
 const program = new Command();
 
@@ -94,8 +93,8 @@ configCmd
 program
   .command('use [sources...]')
   .description('Use sources in current project')
-  .option('-p, --projects <tools...>', 'Tools to link (iflow, claude, codebuddy, opencode)')
-  .option('-ls', 'Interactive selection mode for single source')
+  .option('-p, --projects <tools...>', 'Tools to link (iflow, claude, codebuddy, opencode, codex)')
+  .option('-l, --ls', 'Interactive selection mode for single source')
   .option('-c, --config <file>', 'Import from config file')
   .action(async (sources: string[], options) => {
     await handleUse(sources, options);

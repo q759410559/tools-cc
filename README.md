@@ -1,6 +1,6 @@
 # tools-cc
 
-一个用于统一管理多个 AI 编程工具（iflow、claude、codebuddy、opencode 等）的 skills/commands/agents 配置的 CLI 工具。通过符号链接机制，避免在多个工具间重复配置。
+一个用于统一管理多个 AI 编程工具（iflow、claude、codebuddy、opencode、codex 等）的 skills/commands/agents 配置的 CLI 工具。通过符号链接机制，避免在多个工具间重复配置。
 
 ## 安装
 
@@ -34,11 +34,11 @@ tools-cc -s list
 
 # 4. 在项目中启用配置源并创建链接
 cd my-project
-tools-cc use my-skills -p iflow claude
+tools-cc use my-skills -p iflow claude codex
 
 # 4a. 或使用部分引入（只引入需要的 skills/commands/agents）
 tools-cc use my-skills/skills/a-skill
-tools-cc use my-skills -ls                 # 交互式选择
+tools-cc use my-skills --ls                # 交互式选择
 
 # 4b. 或从配置文件快速导入
 tools-cc use -c project-config.json
@@ -119,7 +119,7 @@ tools-cc export [options]                 # 导出项目或全局配置
 ```bash
 # 整源引入（全部 skills/commands/agents）
 tools-cc use my-skills
-tools-cc use my-skills -p iflow claude    # 指定工具链接
+tools-cc use my-skills -p iflow claude codex    # 指定工具链接
 
 # 部分引入（路径语法）
 tools-cc use my-skills/skills/a-skill     # 引入单个 skill
@@ -127,14 +127,14 @@ tools-cc use my-skills/commands/test      # 引入单个 command
 tools-cc use my-skills/agents/reviewer    # 引入单个 agent
 tools-cc use my-skills/skills/a my-skills/commands/test  # 引入多项
 
-# 交互式选择（-ls 参数）
-tools-cc use my-skills -ls                # 分组展示，勾选引入
+# 交互式选择（--ls 参数）
+tools-cc use my-skills --ls               # 分组展示，勾选引入
 
 # 从配置文件导入
 tools-cc use -c project-config.json       # 快速恢复项目配置
 
 # 使用 "." 表示当前项目已配置的源（只创建链接，不复制内容）
-tools-cc use . -p iflow claude
+tools-cc use . -p iflow claude codex
 ```
 
 #### `export` 命令详解
@@ -178,6 +178,7 @@ tools-cc --version                        # 显示版本号
 | claude | `.claude` |
 | codebuddy | `.codebuddy` |
 | opencode | `.opencode` |
+| codex | `.codex` |
 
 ## 配置源结构
 
@@ -224,7 +225,8 @@ my-project/
 │   └── agents/
 │       └── my-skills/
 ├── .iflow -> .toolscc            # 符号链接
-└── .claude -> .toolscc
+├── .claude -> .toolscc
+└── .codex -> .toolscc
 ```
 
 ## 配置文件
@@ -258,7 +260,7 @@ my-project/
       "agents": ["*"]
     }
   },
-  "links": ["iflow", "claude"]
+  "links": ["iflow", "claude", "codex"]
 }
 ```
 

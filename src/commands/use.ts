@@ -6,7 +6,7 @@ import { scanSource } from '../core/manifest';
 import { createSymlink, isSymlink } from '../core/symlink';
 import { GLOBAL_CONFIG_DIR, getToolsccDir, getProjectConfigPath } from '../utils/path';
 import { parseSourcePath, buildSelectionFromPaths } from '../utils/parsePath';
-import { SourceSelection } from '../types/config';
+import type { SourceSelection } from '../types/config';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -14,16 +14,8 @@ const SUPPORTED_TOOLS: Record<string, string> = {
   iflow: '.iflow',
   claude: '.claude',
   codebuddy: '.codebuddy',
-  opencode: '.opencode'
-};
-
-/**
- * 默认选择配置 - 导入所有内容
- */
-const DEFAULT_SELECTION: SourceSelection = {
-  skills: ['*'],
-  commands: ['*'],
-  agents: ['*']
+  opencode: '.opencode',
+  codex: '.codex'
 };
 
 /**
@@ -40,7 +32,7 @@ export interface UseOptions {
  * 
  * 支持多种模式：
  * 1. 配置导入模式: tools-cc use -c config.json
- * 2. 交互选择模式: tools-cc use my-source -ls
+ * 2. 交互选择模式: tools-cc use my-source --ls
  * 3. 路径语法模式: tools-cc use my-source/skills/a-skill
  * 4. 整体导入模式: tools-cc use my-source
  * 5. 点模式: tools-cc use . (使用已配置源)
@@ -65,7 +57,7 @@ export async function handleUse(
     return;
   }
 
-  // 3. 交互选择模式：单个源 + -ls 选项
+  // 3. 交互选择模式：单个源 + --ls 选项
   if (options.ls && sourceSpecs.length === 1) {
     const parsed = parseSourcePath(sourceSpecs[0]);
     // 只有源名称时才进入交互模式
@@ -178,7 +170,7 @@ async function handleInteractiveMode(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const choices: any[] = [];
 
-    // Skills 组
+    // Skills 区
     if (manifest.skills && manifest.skills.length > 0) {
       choices.push(new inquirer.Separator(`--- Skills (${manifest.skills.length}) ---`));
       for (const skill of manifest.skills) {
@@ -186,7 +178,7 @@ async function handleInteractiveMode(
       }
     }
 
-    // Commands 组
+    // Commands 区
     if (manifest.commands && manifest.commands.length > 0) {
       choices.push(new inquirer.Separator(`--- Commands (${manifest.commands.length}) ---`));
       for (const cmd of manifest.commands) {
@@ -194,7 +186,7 @@ async function handleInteractiveMode(
       }
     }
 
-    // Agents 组
+    // Agents 区
     if (manifest.agents && manifest.agents.length > 0) {
       choices.push(new inquirer.Separator(`--- Agents (${manifest.agents.length}) ---`));
       for (const agent of manifest.agents) {
