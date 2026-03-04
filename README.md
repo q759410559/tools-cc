@@ -168,6 +168,24 @@ tools-cc config get <key>                 # 查看配置
 tools-cc config list                      # 查看完整全局配置
 ```
 
+### Template 管理
+
+```bash
+# 完整命令 (template)
+tools-cc template save                    # 保存当前项目配置为模板 (缩写: tpl save)
+tools-cc template save -n my-template     # 指定模板名称保存
+tools-cc template list                    # 列出所有保存的模板 (缩写: template ls, tpl list, tpl ls)
+tools-cc template rm <name>               # 删除模板 (缩写: tpl rm)
+tools-cc template use [name]              # 应用模板到当前项目 (缩写: tpl use)
+
+# 快捷方式 (tpl)
+tools-cc tpl save                         # 保存当前项目配置为模板
+tools-cc tpl save -n my-template          # 指定模板名称保存
+tools-cc tpl list                         # 列出所有保存的模板
+tools-cc tpl rm <name>                    # 删除模板
+tools-cc tpl use [name]                   # 应用模板到当前项目
+```
+
 ### 帮助
 
 ```bash

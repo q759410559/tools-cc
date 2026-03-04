@@ -159,6 +159,24 @@ tools-cc config get <key>                 # Get configuration
 tools-cc config list                      # View complete global configuration
 ```
 
+### Template Management
+
+```bash
+# Full commands (template)
+tools-cc template save                    # Save current project config as template (alias: tpl save)
+tools-cc template save -n my-template     # Save with specified template name
+tools-cc template list                    # List all saved templates (alias: template ls, tpl list, tpl ls)
+tools-cc template rm <name>               # Remove a template (alias: tpl rm)
+tools-cc template use [name]              # Apply a template to current project (alias: tpl use)
+
+# Shortcuts (tpl)
+tools-cc tpl save                         # Save current project config as template
+tools-cc tpl save -n my-template          # Save with specified template name
+tools-cc tpl list                         # List all saved templates
+tools-cc tpl rm <name>                    # Remove a template
+tools-cc tpl use [name]                   # Apply a template to current project
+```
+
 ### Help
 
 ```bash
