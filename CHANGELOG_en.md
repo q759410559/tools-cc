@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.8] - 2026-03-04
+
+### Added
+- Added template management feature for saving/reusing project configs
+  - `tools-cc template save [-n <name>]` save current project config as template
+  - `tools-cc template list` list all saved templates
+  - `tools-cc template rm <name>` remove a template
+  - `tools-cc template use [name]` apply template to current project (interactive selection if no name)
+- Templates stored in `~/.tools-cc/templates/` directory
+
+### Fixed
+- Fixed test files not being tracked in version control
+
 ## [1.0.7] - 2026-03-02
 
 ### Fixed

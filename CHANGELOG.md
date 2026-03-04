@@ -2,6 +2,19 @@
 
 本项目的所有重要变更都将记录在此文件中。
 
+## [1.0.8] - 2026-03-04
+
+### Added
+- 新增模板管理功能，支持保存/复用项目配置
+  - `tools-cc template save [-n <name>]` 保存当前项目配置为模板
+  - `tools-cc template list` 列出所有已保存的模板
+  - `tools-cc template rm <name>` 删除模板
+  - `tools-cc template use [name]` 应用模板到当前项目（无参数时交互选择）
+- 模板存储在 `~/.tools-cc/templates/` 目录
+
+### Fixed
+- 修复测试文件未纳入版本控制的问题
+
 ## [1.0.7] - 2026-03-02
 
 ### Fixed
