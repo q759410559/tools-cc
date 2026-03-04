@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.9] - 2026-03-04
+
+### Added
+- Added rules support for managing rules configurations
+  - `tools-cc use source:rules/my-rule` import only specified rule
+  - `tools-cc use source:rules/` import all rules
+  - Interactive mode supports rules selection
+- Rules stored in `.toolscc/rules/<source>/` directory
+
 ## [1.0.8] - 2026-03-04
 
 ### Added

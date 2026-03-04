@@ -1,6 +1,6 @@
 {
   "name": "tools-cc",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "tools-cc [options] <command> [args]",
   "main": "index.js",
   "directories": {

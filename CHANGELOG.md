@@ -2,6 +2,15 @@
 
 本项目的所有重要变更都将记录在此文件中。
 
+## [1.0.9] - 2026-03-04
+
+### Added
+- 新增 rules 支持，可管理 rules 配置
+  - `tools-cc use source:rules/my-rule` 只导入指定 rule
+  - `tools-cc use source:rules/` 导入所有 rules
+  - 交互模式支持 rules 选择
+- Rules 存储在 `.toolscc/rules/<source>/` 目录
+
 ## [1.0.8] - 2026-03-04
 
 ### Added
