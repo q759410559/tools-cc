@@ -100,3 +100,14 @@ export interface GlobalExportConfig {
   config: GlobalConfig;
   exportedAt: string;
 }
+
+/**
+ * 模板配置格式
+ */
+export interface TemplateConfig {
+  version: string;
+  name: string;
+  sourceProject: string;
+  savedAt: string;
+  config: ProjectConfig;
+}
