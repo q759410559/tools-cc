@@ -21,39 +21,43 @@ export async function handleTemplateSave(options: { name?: string }): Promise<vo
     return;
   }
 
-  // 读取项目配置
-  const config = await loadProjectConfig(projectDir);
-  if (!config) {
-    console.log(chalk.yellow('No project configuration found.'));
-    return;
-  }
-
-  // 确定模板名称
-  let templateName = options.name;
-  if (!templateName) {
-    templateName = path.basename(projectDir);
-  }
-
-  // 检查是否已存在
-  const existing = await getTemplate(templateName, TEMPLATES_DIR);
-  if (existing) {
-    const answers = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'overwrite',
-        message: `Template "${templateName}" already exists. Overwrite?`,
-        default: false
-      }
-    ]);
-    if (!answers.overwrite) {
-      console.log(chalk.gray('Cancelled.'));
+  try {
+    // 读取项目配置
+    const config = await loadProjectConfig(projectDir);
+    if (!config) {
+      console.log(chalk.yellow('No project configuration found.'));
       return;
     }
-  }
 
-  // 保存模板
-  const template = await saveTemplate(templateName, projectDir, config, TEMPLATES_DIR);
-  console.log(chalk.green(`Template saved: ${template.name}`));
+    // 确定模板名称
+    let templateName = options.name;
+    if (!templateName) {
+      templateName = path.basename(projectDir);
+    }
+
+    // 检查是否已存在
+    const existing = await getTemplate(templateName, TEMPLATES_DIR);
+    if (existing) {
+      const answers = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'overwrite',
+          message: `Template "${templateName}" already exists. Overwrite?`,
+          default: false
+        }
+      ]);
+      if (!answers.overwrite) {
+        console.log(chalk.gray('Cancelled.'));
+        return;
+      }
+    }
+
+    // 保存模板
+    const template = await saveTemplate(templateName, projectDir, config, TEMPLATES_DIR);
+    console.log(chalk.green(`✓ Template saved: ${template.name}`));
+  } catch (error) {
+    console.log(chalk.red(`✗ Failed to save template: ${error instanceof Error ? error.message : 'Unknown error'}`));
+  }
 }
 
 /**
@@ -80,9 +84,9 @@ export async function handleTemplateList(): Promise<void> {
 export async function handleTemplateRemove(name: string): Promise<void> {
   try {
     await removeTemplate(name, TEMPLATES_DIR);
-    console.log(chalk.green(`Template removed: ${name}`));
+    console.log(chalk.green(`✓ Template removed: ${name}`));
   } catch (error) {
-    console.log(chalk.red(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    console.log(chalk.red(`✗ Failed to remove template: ${error instanceof Error ? error.message : 'Unknown error'}`));
   }
 }
 
@@ -91,6 +95,13 @@ export async function handleTemplateRemove(name: string): Promise<void> {
  */
 export async function handleTemplateUse(name?: string): Promise<void> {
   const projectDir = process.cwd();
+  const configFile = getProjectConfigPath(projectDir);
+
+  // 检查项目是否已初始化
+  if (!(await fs.pathExists(configFile))) {
+    console.log(chalk.yellow('Project not initialized. Run `tools-cc use <source>` first.'));
+    return;
+  }
 
   // 如果没有指定名称，显示选择列表
   if (!name) {
@@ -118,7 +129,7 @@ export async function handleTemplateUse(name?: string): Promise<void> {
   // 获取模板
   const template = await getTemplate(name as string, TEMPLATES_DIR);
   if (!template) {
-    console.log(chalk.red(`Error: Template not found: ${name}`));
+    console.log(chalk.red(`✗ Template not found: ${name}`));
     return;
   }
 
@@ -127,26 +138,23 @@ export async function handleTemplateUse(name?: string): Promise<void> {
     return await getSourcePath(sourceName, GLOBAL_CONFIG_DIR);
   };
 
+  // 创建临时配置文件
+  const tempConfigPath = path.join(projectDir, '.toolscc-template-temp.json');
+  const exportConfig = {
+    version: '1.0',
+    type: 'project' as const,
+    config: template.config,
+    exportedAt: new Date().toISOString()
+  };
+
   // 导入配置
   try {
-    // 创建临时配置文件
-    const tempConfigPath = path.join(projectDir, '.toolscc-template-temp.json');
-    const exportConfig = {
-      version: '1.0',
-      type: 'project' as const,
-      config: template.config,
-      exportedAt: new Date().toISOString()
-    };
     await fs.writeJson(tempConfigPath, exportConfig, { spaces: 2 });
-
-    // 导入配置
     await importProjectConfig(tempConfigPath, projectDir, resolveSourcePath);
-
-    // 清理临时文件
-    await fs.remove(tempConfigPath);
-
-    console.log(chalk.green(`Applied template: ${name}`));
+    console.log(chalk.green(`✓ Applied template: ${name}`));
   } catch (error) {
-    console.log(chalk.red(`Error: Failed to apply template: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    console.log(chalk.red(`✗ Failed to apply template: ${error instanceof Error ? error.message : 'Unknown error'}`));
+  } finally {
+    await fs.remove(tempConfigPath);
   }
 }
