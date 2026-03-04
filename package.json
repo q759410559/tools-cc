@@ -18,14 +18,14 @@
     "release": "npm run tag:create && npm run publish:npm && npm run release:gh"
   },
   "bin": {
-    "tools-cc": "./dist/index.js"
+    "tools-cc": "dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/q759410559/tools-cc.git"
+    "url": "git+https://github.com/q759410559/tools-cc.git"
   },
   "bugs": {
     "url": "https://github.com/q759410559/tools-cc/issues"
