@@ -97,7 +97,8 @@ describe('handleUse Command - buildSelectionFromPaths', () => {
       'my-skills': {
         skills: ['a-skill', 'b-skill'],
         commands: ['test-cmd'],
-        agents: []
+        agents: [],
+        rules: []
       }
     });
   });
@@ -111,7 +112,8 @@ describe('handleUse Command - buildSelectionFromPaths', () => {
       'my-skills': {
         skills: ['*'],
         commands: ['*'],
-        agents: ['*']
+        agents: ['*'],
+        rules: ['*']
       }
     });
   });
@@ -128,12 +130,14 @@ describe('handleUse Command - buildSelectionFromPaths', () => {
       'source-a': {
         skills: ['skill1'],
         commands: [],
-        agents: []
+        agents: [],
+        rules: []
       },
       'source-b': {
         skills: [],
         commands: ['cmd1'],
-        agents: []
+        agents: [],
+        rules: []
       }
     });
   });
@@ -169,7 +173,8 @@ describe('handleUse Command - buildSelectionFromPaths', () => {
     expect(result['my-skills']).toEqual({
       skills: ['*'],
       commands: ['*'],
-      agents: ['*']
+      agents: ['*'],
+      rules: ['*']
     });
   });
 });
@@ -271,7 +276,8 @@ describe('handleUse Command - integration tests', () => {
           'imported-source': {
             skills: ['test-skill'],
             commands: [],
-            agents: []
+            agents: [],
+            rules: []
           }
         },
         links: []

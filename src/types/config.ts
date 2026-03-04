@@ -10,12 +10,13 @@ export interface GlobalConfig {
 }
 
 /**
- * 源选择配置 - 指定从源中导入哪些 skills/commands/agents
+ * 源选择配置 - 指定从源中导入哪些 skills/commands/agents/rules
  */
 export interface SourceSelection {
   skills: string[];
   commands: string[];
   agents: string[];
+  rules: string[];
 }
 
 /**
@@ -43,7 +44,8 @@ export function isSourceSelection(value: unknown): value is SourceSelection {
   return (
     Array.isArray(obj.skills) &&
     Array.isArray(obj.commands) &&
-    Array.isArray(obj.agents)
+    Array.isArray(obj.agents) &&
+    Array.isArray(obj.rules)
   );
 }
 
@@ -61,7 +63,8 @@ export function normalizeProjectConfig(
       newSources[sourceName] = {
         skills: ['*'],
         commands: ['*'],
-        agents: ['*']
+        agents: ['*'],
+        rules: ['*']
       };
     }
     return { sources: newSources, links: config.links };
@@ -75,6 +78,7 @@ export interface Manifest {
   skills?: string[];
   commands?: string[];
   agents?: string[];
+  rules?: string[];
 }
 
 export interface ToolConfig {

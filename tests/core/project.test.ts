@@ -88,7 +88,8 @@ describe('Partial Import', () => {
     const selection: SourceSelection = {
       skills: ['skill-a', 'skill-c'],
       commands: [],
-      agents: []
+      agents: [],
+      rules: []
     };
     
     await useSource('partial-source', testSourceDir, testProjectDir, selection);
@@ -111,7 +112,8 @@ describe('Partial Import', () => {
     const selection: SourceSelection = {
       skills: ['*'],
       commands: ['*'],
-      agents: ['*']
+      agents: ['*'],
+      rules: ['*']
     };
     
     await useSource('wildcard-source', testSourceDir, testProjectDir, selection);
@@ -137,7 +139,8 @@ describe('Partial Import', () => {
     const selection: SourceSelection = {
       skills: [],
       commands: ['cmd1', 'cmd3'],
-      agents: ['agent2']
+      agents: ['agent2'],
+      rules: []
     };
     
     await useSource('partial-cmd-agent', testSourceDir, testProjectDir, selection);
@@ -161,7 +164,8 @@ describe('Partial Import', () => {
     const selection: SourceSelection = {
       skills: ['skill-a'],
       commands: ['cmd1'],
-      agents: ['agent1']
+      agents: ['agent1'],
+      rules: []
     };
     
     await useSource('config-source', testSourceDir, testProjectDir, selection);
@@ -186,7 +190,8 @@ describe('Partial Import', () => {
     expect(config.sources['default-source']).toEqual({
       skills: ['*'],
       commands: ['*'],
-      agents: ['*']
+      agents: ['*'],
+      rules: ['*']
     });
   });
 });
@@ -228,7 +233,8 @@ describe('Export/Import Project Config', () => {
     const selection: SourceSelection = {
       skills: ['skill-a'],
       commands: ['cmd1'],
-      agents: ['*']
+      agents: ['*'],
+      rules: []
     };
     
     await useSource('export-source', testSourceDir, testProjectDir, selection);
@@ -258,7 +264,8 @@ describe('Export/Import Project Config', () => {
           'import-source': {
             skills: ['skill-b'],
             commands: ['cmd2'],
-            agents: []
+            agents: [],
+            rules: []
           }
         },
         links: []
@@ -282,7 +289,8 @@ describe('Export/Import Project Config', () => {
     expect(config.sources['import-source']).toEqual({
       skills: ['skill-b'],
       commands: ['cmd2'],
-      agents: []
+      agents: [],
+      rules: []
     });
     
     // Verify files were copied

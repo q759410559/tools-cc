@@ -5,7 +5,7 @@ import { SourceSelection } from '../types/config';
  */
 export interface ParsedSourcePath {
   sourceName: string;
-  type?: 'skills' | 'commands' | 'agents';
+  type?: 'skills' | 'commands' | 'agents' | 'rules';
   itemName?: string;
 }
 
@@ -36,7 +36,7 @@ export function parseSourcePath(input: string): ParsedSourcePath {
   }
   
   // 检查第二部分是否为有效类型
-  const validTypes = ['skills', 'commands', 'agents'] as const;
+  const validTypes = ['skills', 'commands', 'agents', 'rules'] as const;
   const type = parts[1] as typeof validTypes[number];
   
   if (!validTypes.includes(type)) {
@@ -81,7 +81,8 @@ export function buildSelectionFromPaths(paths: string[]): Record<string, SourceS
       result[sourceName] = {
         skills: [],
         commands: [],
-        agents: []
+        agents: [],
+        rules: []
       };
     }
     
@@ -90,7 +91,8 @@ export function buildSelectionFromPaths(paths: string[]): Record<string, SourceS
       result[sourceName] = {
         skills: ['*'],
         commands: ['*'],
-        agents: ['*']
+        agents: ['*'],
+        rules: ['*']
       };
       continue;
     }

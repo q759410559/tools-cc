@@ -195,6 +195,14 @@ async function handleInteractiveMode(
       }
     }
 
+    // Rules 区
+    if (manifest.rules && manifest.rules.length > 0) {
+      choices.push(new inquirer.Separator(`--- Rules (${manifest.rules.length}) ---`));
+      for (const rule of manifest.rules) {
+        choices.push({ name: rule, value: `rules/${rule}` });
+      }
+    }
+
     if (choices.length === 0) {
       console.log(chalk.yellow(`No items found in source: ${sourceName}`));
       return;
@@ -220,7 +228,8 @@ async function handleInteractiveMode(
     const selection: SourceSelection = {
       skills: [],
       commands: [],
-      agents: []
+      agents: [],
+      rules: []
     };
 
     for (const item of answers.selectedItems) {
@@ -228,6 +237,7 @@ async function handleInteractiveMode(
       if (type === 'skills') selection.skills.push(name);
       else if (type === 'commands') selection.commands.push(name);
       else if (type === 'agents') selection.agents.push(name);
+      else if (type === 'rules') selection.rules.push(name);
     }
 
     // 初始化项目并应用选择

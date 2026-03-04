@@ -122,6 +122,7 @@ tools-cc use my-skills -p iflow claude codex    # Specify tool links
 tools-cc use my-skills/skills/a-skill     # Import single skill
 tools-cc use my-skills/commands/test      # Import single command
 tools-cc use my-skills/agents/reviewer    # Import single agent
+tools-cc use my-skills/rules/my-rule      # Import single rule
 tools-cc use my-skills/skills/a my-skills/commands/test  # Import multiple
 
 # Interactive content selection (--ls flag)
@@ -207,8 +208,11 @@ my-skills/
 │       └── SKILL.md
 ├── commands/
 │   └── my-command.md
-└── agents/
-    └── my-agent.md
+├── agents/
+│   └── my-agent.md
+└── rules/
+    └── my-rule/
+        └── RULE.md
 ```
 
 ### manifest.json Format
@@ -219,7 +223,8 @@ my-skills/
   "version": "1.0.0",
   "skills": ["my-skill"],
   "commands": ["my-command"],
-  "agents": ["my-agent"]
+  "agents": ["my-agent"],
+  "rules": ["my-rule"]
 }
 ```
 
@@ -237,7 +242,9 @@ my-project/
 │   │   └── my-skills-my-skill/
 │   ├── commands/
 │   │   └── my-skills/
-│   └── agents/
+│   ├── agents/
+│   │   └── my-skills/
+│   └── rules/
 │       └── my-skills/
 ├── .iflow -> .toolscc            # Symbolic link
 └── .claude -> .toolscc
@@ -271,7 +278,8 @@ my-project/
     "my-skills": {
       "skills": ["a-skill", "b-skill"],
       "commands": ["test"],
-      "agents": ["*"]
+      "agents": ["*"],
+      "rules": []
     }
   },
   "links": ["iflow", "claude", "codex"]

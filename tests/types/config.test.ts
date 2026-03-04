@@ -15,7 +15,8 @@ describe('SourceSelection', () => {
       const valid: SourceSelection = {
         skills: ['skill1'],
         commands: ['cmd1'],
-        agents: ['agent1']
+        agents: ['agent1'],
+        rules: []
       };
       expect(isSourceSelection(valid)).toBe(true);
     });
@@ -24,7 +25,8 @@ describe('SourceSelection', () => {
       const empty: SourceSelection = {
         skills: [],
         commands: [],
-        agents: []
+        agents: [],
+        rules: []
       };
       expect(isSourceSelection(empty)).toBe(true);
     });
@@ -33,7 +35,8 @@ describe('SourceSelection', () => {
       const wildcard: SourceSelection = {
         skills: ['*'],
         commands: ['*'],
-        agents: ['*']
+        agents: ['*'],
+        rules: ['*']
       };
       expect(isSourceSelection(wildcard)).toBe(true);
     });
@@ -55,7 +58,8 @@ describe('SourceSelection', () => {
     it('should return false for object missing skills', () => {
       const invalid = {
         commands: ['cmd1'],
-        agents: ['agent1']
+        agents: ['agent1'],
+        rules: []
       };
       expect(isSourceSelection(invalid)).toBe(false);
     });
@@ -63,7 +67,8 @@ describe('SourceSelection', () => {
     it('should return false for object missing commands', () => {
       const invalid = {
         skills: ['skill1'],
-        agents: ['agent1']
+        agents: ['agent1'],
+        rules: []
       };
       expect(isSourceSelection(invalid)).toBe(false);
     });
@@ -71,7 +76,17 @@ describe('SourceSelection', () => {
     it('should return false for object missing agents', () => {
       const invalid = {
         skills: ['skill1'],
-        commands: ['cmd1']
+        commands: ['cmd1'],
+        rules: []
+      };
+      expect(isSourceSelection(invalid)).toBe(false);
+    });
+
+    it('should return false for object missing rules', () => {
+      const invalid = {
+        skills: ['skill1'],
+        commands: ['cmd1'],
+        agents: ['agent1']
       };
       expect(isSourceSelection(invalid)).toBe(false);
     });
@@ -80,7 +95,8 @@ describe('SourceSelection', () => {
       const invalid = {
         skills: 'not-array',
         commands: ['cmd1'],
-        agents: ['agent1']
+        agents: ['agent1'],
+        rules: []
       };
       expect(isSourceSelection(invalid)).toBe(false);
     });
@@ -89,7 +105,8 @@ describe('SourceSelection', () => {
       const invalid = {
         skills: ['skill1'],
         commands: 123,
-        agents: ['agent1']
+        agents: ['agent1'],
+        rules: []
       };
       expect(isSourceSelection(invalid)).toBe(false);
     });
@@ -98,7 +115,18 @@ describe('SourceSelection', () => {
       const invalid = {
         skills: ['skill1'],
         commands: ['cmd1'],
-        agents: null
+        agents: null,
+        rules: []
+      };
+      expect(isSourceSelection(invalid)).toBe(false);
+    });
+
+    it('should return false for object with non-array rules', () => {
+      const invalid = {
+        skills: ['skill1'],
+        commands: ['cmd1'],
+        agents: ['agent1'],
+        rules: 'not-array'
       };
       expect(isSourceSelection(invalid)).toBe(false);
     });
@@ -116,8 +144,8 @@ describe('normalizeProjectConfig', () => {
       const result = normalizeProjectConfig(legacy);
 
       expect(result.sources).toEqual({
-        source1: { skills: ['*'], commands: ['*'], agents: ['*'] },
-        source2: { skills: ['*'], commands: ['*'], agents: ['*'] }
+        source1: { skills: ['*'], commands: ['*'], agents: ['*'], rules: ['*'] },
+        source2: { skills: ['*'], commands: ['*'], agents: ['*'], rules: ['*'] }
       });
       expect(result.links).toEqual(['iflow', 'claude']);
     });
@@ -150,7 +178,7 @@ describe('normalizeProjectConfig', () => {
     it('should return ProjectConfig as-is when already in new format', () => {
       const newConfig: ProjectConfig = {
         sources: {
-          source1: { skills: ['skill1'], commands: ['cmd1'], agents: ['agent1'] }
+          source1: { skills: ['skill1'], commands: ['cmd1'], agents: ['agent1'], rules: [] }
         },
         links: ['iflow']
       };
@@ -163,7 +191,7 @@ describe('normalizeProjectConfig', () => {
     it('should handle partial selection in new format', () => {
       const newConfig: ProjectConfig = {
         sources: {
-          source1: { skills: ['skill1', 'skill2'], commands: [], agents: ['*'] }
+          source1: { skills: ['skill1', 'skill2'], commands: [], agents: ['*'], rules: ['rule1'] }
         },
         links: ['claude']
       };
@@ -176,8 +204,8 @@ describe('normalizeProjectConfig', () => {
     it('should handle multiple sources with different selections', () => {
       const newConfig: ProjectConfig = {
         sources: {
-          source1: { skills: ['*'], commands: ['*'], agents: ['*'] },
-          source2: { skills: ['skill-a'], commands: [], agents: ['agent-x'] }
+          source1: { skills: ['*'], commands: ['*'], agents: ['*'], rules: ['*'] },
+          source2: { skills: ['skill-a'], commands: [], agents: ['agent-x'], rules: [] }
         },
         links: ['iflow', 'opencode']
       };
@@ -197,7 +225,7 @@ describe('ExportConfig', () => {
         type: 'project',
         config: {
           sources: {
-            source1: { skills: ['*'], commands: ['*'], agents: ['*'] }
+            source1: { skills: ['*'], commands: ['*'], agents: ['*'], rules: ['*'] }
           },
           links: ['iflow']
         },

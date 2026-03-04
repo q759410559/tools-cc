@@ -119,7 +119,8 @@ describe('buildSelectionFromPaths', () => {
       'my-skills': {
         skills: ['a-skill'],
         commands: [],
-        agents: []
+        agents: [],
+        rules: []
       }
     });
   });
@@ -132,7 +133,8 @@ describe('buildSelectionFromPaths', () => {
       'my-skills': {
         skills: ['a', 'b'],
         commands: [],
-        agents: []
+        agents: [],
+        rules: []
       }
     });
   });
@@ -149,7 +151,8 @@ describe('buildSelectionFromPaths', () => {
       'my-skills': {
         skills: ['a', 'b'],
         commands: ['test'],
-        agents: []
+        agents: [],
+        rules: []
       }
     });
   });
@@ -166,12 +169,14 @@ describe('buildSelectionFromPaths', () => {
       'source-a': {
         skills: ['skill1'],
         commands: [],
-        agents: []
+        agents: [],
+        rules: []
       },
       'source-b': {
         skills: [],
         commands: ['cmd1'],
-        agents: ['agent1']
+        agents: ['agent1'],
+        rules: []
       }
     });
   });
@@ -184,7 +189,8 @@ describe('buildSelectionFromPaths', () => {
       'my-skills': {
         skills: ['*'],
         commands: ['*'],
-        agents: ['*']
+        agents: ['*'],
+        rules: ['*']
       }
     });
   });
@@ -201,12 +207,14 @@ describe('buildSelectionFromPaths', () => {
       'source-a': {
         skills: ['*'],
         commands: ['*'],
-        agents: ['*']
+        agents: ['*'],
+        rules: ['*']
       },
       'source-b': {
         skills: ['skill1'],
         commands: ['cmd1'],
-        agents: []
+        agents: [],
+        rules: []
       }
     });
   });
@@ -228,7 +236,8 @@ describe('buildSelectionFromPaths', () => {
       'my-skills': {
         skills: ['a', 'b'],
         commands: [],
-        agents: []
+        agents: [],
+        rules: []
       }
     });
   });

@@ -131,6 +131,7 @@ tools-cc use my-skills -p iflow claude codex    # 指定工具链接
 tools-cc use my-skills/skills/a-skill     # 引入单个 skill
 tools-cc use my-skills/commands/test      # 引入单个 command
 tools-cc use my-skills/agents/reviewer    # 引入单个 agent
+tools-cc use my-skills/rules/my-rule      # 引入单个 rule
 tools-cc use my-skills/skills/a my-skills/commands/test  # 引入多项
 
 # 交互式选择内容（--ls 参数）
@@ -216,8 +217,11 @@ my-skills/
 │       └── SKILL.md
 ├── commands/
 │   └── my-command.md
-└── agents/
-    └── my-agent.md
+├── agents/
+│   └── my-agent.md
+└── rules/
+    └── my-rule/
+        └── RULE.md
 ```
 
 ### manifest.json 格式
@@ -228,7 +232,8 @@ my-skills/
   "version": "1.0.0",
   "skills": ["my-skill"],
   "commands": ["my-command"],
-  "agents": ["my-agent"]
+  "agents": ["my-agent"],
+  "rules": ["my-rule"]
 }
 ```
 
@@ -246,7 +251,9 @@ my-project/
 │   │   └── my-skills-my-skill/
 │   ├── commands/
 │   │   └── my-skills/
-│   └── agents/
+│   ├── agents/
+│   │   └── my-skills/
+│   └── rules/
 │       └── my-skills/
 ├── .iflow -> .toolscc            # 符号链接
 ├── .claude -> .toolscc
@@ -281,7 +288,8 @@ my-project/
     "my-skills": {
       "skills": ["a-skill", "b-skill"],
       "commands": ["test"],
-      "agents": ["*"]
+      "agents": ["*"],
+      "rules": []
     }
   },
   "links": ["iflow", "claude", "codex"]

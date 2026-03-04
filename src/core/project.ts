@@ -10,7 +10,8 @@ import { getToolsccDir, getProjectConfigPath } from '../utils/path';
 const DEFAULT_SELECTION: SourceSelection = {
   skills: ['*'],
   commands: ['*'],
-  agents: ['*']
+  agents: ['*'],
+  rules: ['*']
 };
 
 export async function initProject(projectDir: string): Promise<void> {
@@ -21,6 +22,7 @@ export async function initProject(projectDir: string): Promise<void> {
   await fs.ensureDir(path.join(toolsccDir, 'skills'));
   await fs.ensureDir(path.join(toolsccDir, 'commands'));
   await fs.ensureDir(path.join(toolsccDir, 'agents'));
+  await fs.ensureDir(path.join(toolsccDir, 'rules'));
 
   // Create project config if not exists
   if (!(await fs.pathExists(configFile))) {
@@ -152,6 +154,29 @@ export async function useSource(
     }
   }
 
+  // Copy rules (in subdirectory by source name)
+  const sourceRulesDir = path.join(sourceDir, 'rules');
+  if (await fs.pathExists(sourceRulesDir)) {
+    // 检查是否有选择 rules
+    if (effectiveSelection.rules.includes('*')) {
+      // 复制所有 rules
+      const destDir = path.join(toolsccDir, 'rules', sourceName);
+      await fs.remove(destDir);
+      await fs.copy(sourceRulesDir, destDir);
+    } else if (effectiveSelection.rules.length > 0) {
+      // 只复制选中的 rules
+      const destDir = path.join(toolsccDir, 'rules', sourceName);
+      await fs.ensureDir(destDir);
+      
+      for (const ruleName of effectiveSelection.rules) {
+        const srcDir = path.join(sourceRulesDir, ruleName);
+        if (await fs.pathExists(srcDir)) {
+          await fs.copy(srcDir, path.join(destDir, ruleName));
+        }
+      }
+    }
+  }
+
   // Update project config - 保存实际使用的选择配置
   const configFile = getProjectConfigPath(projectDir);
   const config = await readProjectConfig(configFile);
@@ -184,6 +209,9 @@ export async function unuseSource(sourceName: string, projectDir: string): Promi
 
   // Remove agents subdirectory
   await fs.remove(path.join(toolsccDir, 'agents', sourceName));
+
+  // Remove rules subdirectory
+  await fs.remove(path.join(toolsccDir, 'rules', sourceName));
 
   // Update project config with error handling
   let config: ProjectConfig;

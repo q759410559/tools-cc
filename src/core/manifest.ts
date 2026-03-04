@@ -23,7 +23,8 @@ export async function scanSource(sourceDir: string): Promise<Manifest> {
     version: '0.0.0',
     skills: [],
     commands: [],
-    agents: []
+    agents: [],
+    rules: []
   };
   
   // Scan skills
@@ -51,6 +52,15 @@ export async function scanSource(sourceDir: string): Promise<Manifest> {
     manifest.agents = entries
       .filter(e => e.isFile() && e.name.endsWith('.md'))
       .map(e => e.name.replace('.md', ''));
+  }
+  
+  // Scan rules
+  const rulesDir = path.join(sourceDir, 'rules');
+  if (await fs.pathExists(rulesDir)) {
+    const entries = await fs.readdir(rulesDir, { withFileTypes: true });
+    manifest.rules = entries
+      .filter(e => e.isDirectory())
+      .map(e => e.name);
   }
   
   return manifest;
