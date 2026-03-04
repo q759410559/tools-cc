@@ -23,7 +23,7 @@ ${chalk.bold('COMMANDS / 命令')}
     tools-cc sources add <name> <path-or-url>    Add a source / 添加配置源
     tools-cc sources list, ls                    List all sources / 列出所有配置源
     tools-cc sources remove, rm <name>           Remove a source / 移除配置源
-    tools-cc sources update, up [name]           git pull update / 更新源代码
+    tools-cc sources update, up, upgrade [name]  git pull update / 更新源代码
     tools-cc sources scan                        Scan dir for sources / 扫描发现新源
     
     ${chalk.gray('Shortcut: -s')}  e.g., tools-cc -s add my-skills https://github.com/user/skills.git
@@ -42,6 +42,14 @@ ${chalk.bold('COMMANDS / 命令')}
     tools-cc rm <source>                         Remove source from project / 禁用配置源
     tools-cc status                              Show project status / 显示项目状态
     tools-cc export [options]                    Export config / 导出配置
+
+  ${chalk.cyan('Template Management / 模板管理')}
+    tools-cc template save [-n <name>]           Save project config as template / 保存项目配置为模板
+    tools-cc template list, ls                   List all templates / 列出所有模板
+    tools-cc template rm <name>                  Delete template / 删除模板
+    tools-cc template use [name]                 Apply template to project / 应用模板到项目
+    
+    ${chalk.gray('Shortcut: tpl')}  e.g., tools-cc tpl save, tools-cc tpl list
 
   ${chalk.cyan('Help / 帮助')}
     tools-cc help                                Show this help / 显示此帮助信息
@@ -94,6 +102,15 @@ ${chalk.bold('EXAMPLES / 示例')}
 
   ${chalk.gray('# Export project config / 导出项目配置')}
   tools-cc export -o my-config.json
+
+  ${chalk.gray('# Save project config as template / 保存项目配置为模板')}
+  tools-cc template save -n my-template
+
+  ${chalk.gray('# List all templates / 列出所有模板')}
+  tools-cc template list
+
+  ${chalk.gray('# Apply template to project / 应用模板到项目')}
+  tools-cc template use my-template
 
   ${chalk.gray('# Show full configuration / 显示完整配置')}
   tools-cc config list
