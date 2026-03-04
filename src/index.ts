@@ -5,6 +5,7 @@ import { handleConfigSet, handleConfigGet, handleConfigList } from './commands/c
 import { handleSourceAdd, handleSourceList, handleSourceRemove, handleSourceUpdate, handleSourceScan } from './commands/source';
 import { handleUse, handleList, handleRemove, handleStatus, handleProjectUpdate } from './commands/use';
 import { handleExport } from './commands/export';
+import { handleTemplateSave, handleTemplateList, handleTemplateRemove, handleTemplateUse } from './commands/template';
 import { showHelp } from './commands/help';
 
 const program = new Command();
@@ -87,6 +88,42 @@ configCmd
   .description('Show full configuration')
   .action(async () => {
     await handleConfigList();
+  });
+
+// Template commands
+const templateCmd = program
+  .command('template')
+  .description('Template management')
+  .alias('tpl');
+
+templateCmd
+  .command('save')
+  .description('Save current project config as template')
+  .option('-n, --name <name>', 'Template name (default: project directory name)')
+  .action(async (options) => {
+    await handleTemplateSave(options);
+  });
+
+templateCmd
+  .command('list')
+  .alias('ls')
+  .description('List all saved templates')
+  .action(async () => {
+    await handleTemplateList();
+  });
+
+templateCmd
+  .command('rm <name>')
+  .description('Remove a template')
+  .action(async (name: string) => {
+    await handleTemplateRemove(name);
+  });
+
+templateCmd
+  .command('use [name]')
+  .description('Apply a template to current project')
+  .action(async (name?: string) => {
+    await handleTemplateUse(name);
   });
 
 // Project commands
