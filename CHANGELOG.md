@@ -2,6 +2,16 @@
 
 本项目的所有重要变更都将记录在此文件中。
 
+## [1.0.10] - 2026-03-05
+
+### Added
+- `template use` 命令新增 `-p, --projects <tools...>` 参数，支持指定链接的工具
+  - `tools-cc template use base -p iflow` 只链接 iflow
+  - `tools-cc template use base -p iflow codebuddy` 链接多个工具
+
+### Fixed
+- 修复 `template use` 命令在新项目上无法使用的问题（移除了不必要的初始化检查）
+
 ## [1.0.9] - 2026-03-04
 
 ### Added

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.10] - 2026-03-05
+
+### Added
+- Added `-p, --projects <tools...>` option to `template use` command for specifying tools to link
+  - `tools-cc template use base -p iflow` link only iflow
+  - `tools-cc template use base -p iflow codebuddy` link multiple tools
+
+### Fixed
+- Fixed `template use` command not working on new projects (removed unnecessary initialization check)
+
 ## [1.0.9] - 2026-03-04
 
 ### Added
