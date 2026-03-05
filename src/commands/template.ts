@@ -5,8 +5,17 @@ import { saveTemplate, listTemplates, removeTemplate, getTemplate } from '../cor
 import { loadProjectConfig } from '../core/config';
 import { importProjectConfig } from '../core/project';
 import { getSourcePath } from '../core/source';
-import { TEMPLATES_DIR, getProjectConfigPath, GLOBAL_CONFIG_DIR } from '../utils/path';
+import { createSymlink } from '../core/symlink';
+import { TEMPLATES_DIR, getProjectConfigPath, getToolsccDir, GLOBAL_CONFIG_DIR } from '../utils/path';
 import fs from 'fs-extra';
+
+const SUPPORTED_TOOLS: Record<string, string> = {
+  iflow: '.iflow',
+  claude: '.claude',
+  codebuddy: '.codebuddy',
+  opencode: '.opencode',
+  codex: '.codex'
+};
 
 /**
  * 处理 template save 命令
@@ -93,15 +102,10 @@ export async function handleTemplateRemove(name: string): Promise<void> {
 /**
  * 处理 template use 命令
  */
-export async function handleTemplateUse(name?: string): Promise<void> {
+export async function handleTemplateUse(name?: string, options?: { projects?: string[] }): Promise<void> {
   const projectDir = process.cwd();
+  const toolsccDir = getToolsccDir(projectDir);
   const configFile = getProjectConfigPath(projectDir);
-
-  // 检查项目是否已初始化
-  if (!(await fs.pathExists(configFile))) {
-    console.log(chalk.yellow('Project not initialized. Run `tools-cc use <source>` first.'));
-    return;
-  }
 
   // 如果没有指定名称，显示选择列表
   if (!name) {
@@ -152,9 +156,47 @@ export async function handleTemplateUse(name?: string): Promise<void> {
     await fs.writeJson(tempConfigPath, exportConfig, { spaces: 2 });
     await importProjectConfig(tempConfigPath, projectDir, resolveSourcePath);
     console.log(chalk.green(`✓ Applied template: ${name}`));
+
+    // 创建符号链接
+    await createToolLinks(projectDir, toolsccDir, configFile, options?.projects);
   } catch (error) {
     console.log(chalk.red(`✗ Failed to apply template: ${error instanceof Error ? error.message : 'Unknown error'}`));
   } finally {
     await fs.remove(tempConfigPath);
   }
+}
+
+/**
+ * 创建工具符号链接
+ */
+async function createToolLinks(
+  projectDir: string,
+  toolsccDir: string,
+  configFile: string,
+  projects?: string[]
+): Promise<void> {
+  const tools = projects || Object.keys(SUPPORTED_TOOLS);
+
+  for (const tool of tools) {
+    const linkName = SUPPORTED_TOOLS[tool];
+    if (!linkName) {
+      console.log(chalk.yellow(`Unknown tool: ${tool}`));
+      continue;
+    }
+
+    const linkPath = path.join(projectDir, linkName);
+
+    try {
+      await createSymlink(toolsccDir, linkPath, true);
+      console.log(chalk.green(`✓ Linked: ${linkName} -> .toolscc`));
+    } catch (error) {
+      console.log(chalk.red(`✗ Failed to link ${linkName}: ${error instanceof Error ? error.message : 'Unknown error'}`));
+    }
+  }
+
+  // 更新项目配置
+  const config = await fs.readJson(configFile);
+  const existingLinks = config.links || [];
+  config.links = [...new Set([...existingLinks, ...tools])];
+  await fs.writeJson(configFile, config, { spaces: 2 });
 }

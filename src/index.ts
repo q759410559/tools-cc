@@ -122,8 +122,9 @@ templateCmd
 templateCmd
   .command('use [name]')
   .description('Apply a template to current project')
-  .action(async (name?: string) => {
-    await handleTemplateUse(name);
+  .option('-p, --projects <tools...>', 'Tools to link (iflow, claude, codebuddy, opencode, codex)')
+  .action(async (name: string | undefined, options) => {
+    await handleTemplateUse(name, options);
   });
 
 // Project commands
