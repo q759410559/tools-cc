@@ -50,8 +50,31 @@ export function isSourceSelection(value: unknown): value is SourceSelection {
 }
 
 /**
+ * 默认选择配置 - 导入所有内容
+ */
+const DEFAULT_SOURCE_SELECTION: SourceSelection = {
+  skills: ['*'],
+  commands: ['*'],
+  agents: ['*'],
+  rules: ['*']
+};
+
+/**
+ * 确保 SourceSelection 对象字段完整
+ */
+function normalizeSourceSelection(selection: Partial<SourceSelection> | undefined): SourceSelection {
+  return {
+    skills: selection?.skills ?? DEFAULT_SOURCE_SELECTION.skills,
+    commands: selection?.commands ?? DEFAULT_SOURCE_SELECTION.commands,
+    agents: selection?.agents ?? DEFAULT_SOURCE_SELECTION.agents,
+    rules: selection?.rules ?? DEFAULT_SOURCE_SELECTION.rules
+  };
+}
+
+/**
  * 将旧版项目配置转换为新版格式
  * 如果 sources 是字符串数组，转换为 Record 格式，每个源默认导入全部内容
+ * 同时确保所有 SourceSelection 对象字段完整
  */
 export function normalizeProjectConfig(
   config: LegacyProjectConfig | ProjectConfig
@@ -60,16 +83,18 @@ export function normalizeProjectConfig(
   if (Array.isArray(config.sources)) {
     const newSources: Record<string, SourceSelection> = {};
     for (const sourceName of config.sources) {
-      newSources[sourceName] = {
-        skills: ['*'],
-        commands: ['*'],
-        agents: ['*'],
-        rules: ['*']
-      };
+      newSources[sourceName] = { ...DEFAULT_SOURCE_SELECTION };
     }
     return { sources: newSources, links: config.links };
   }
-  return config as ProjectConfig;
+  
+  // If sources is an object, ensure all SourceSelection fields are complete
+  const normalizedSources: Record<string, SourceSelection> = {};
+  for (const [sourceName, selection] of Object.entries(config.sources as Record<string, Partial<SourceSelection>>)) {
+    normalizedSources[sourceName] = normalizeSourceSelection(selection);
+  }
+  
+  return { sources: normalizedSources, links: config.links };
 }
 
 export interface Manifest {
