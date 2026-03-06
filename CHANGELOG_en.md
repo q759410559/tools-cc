@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.11] - 2026-03-06
+
+### Changed
+- Improved default values and field normalization for project configuration
+
 ## [1.0.10] - 2026-03-05
 
 ### Added
