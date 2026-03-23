@@ -16,7 +16,8 @@ const SUPPORTED_TOOLS: Record<string, string> = {
   claude: '.claude',
   codebuddy: '.codebuddy',
   opencode: '.opencode',
-  codex: '.codex'
+  codex: '.codex',
+  qoder: '.qoder'
 };
 
 /**
